@@ -1,0 +1,68 @@
+server:
+  address: 127.0.0.1
+  port: 18088
+  tomcat:
+    threads:
+      max: 256
+spring:
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      initial-size: 2
+      max-active: 24
+      min-idle: 2
+  redis:
+    host: 127.0.0.1
+    port: 16379
+    database: 0
+    timeout: 3000ms
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.sky.entity
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    com.sky.mapper: info
+campus:
+  payment-mode: demo
+  legacy-jobs-enabled: false
+  alipay:
+    app-id: ''
+    private-key: ''
+    public-key: ''
+    gateway-url: 'https://openapi.alipaydev.com/gateway.do'
+    notify-url: ''
+    return-url: ''
+sky:
+  jwt:
+    admin-ttl: 7200000
+    admin-token-name: token
+    user-ttl: 7200000
+    user-token-name: authentication
+  alioss:
+    endpoint: ''
+    access-key-id: ''
+    access-key-secret: ''
+    bucket-name: ''
+  wechat:
+    appid: ''
+    secret: ''
+    mchid: ''
+    mchSerialNo: ''
+    privateKeyFilePath: ''
+    apiV3Key: ''
+    weChatPayCertFilePath: ''
+    notifyUrl: ''
+    refundNotifyUrl: ''
+  shop:
+    address: '校园食堂预约取餐窗口'
+  baidu:
+    ak: ''

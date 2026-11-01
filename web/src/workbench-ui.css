@@ -1,0 +1,223 @@
+/* 禾序管理端：暖白工作区、墨绿导航与高对比经营数据。 */
+.workbench-page{width:100%;max-width:1540px;min-height:calc(100vh - 76px);grid-template-columns:210px minmax(0,1fr);gap:28px;padding:30px 36px 52px;align-items:start}
+.workbench-sidebar{position:sticky;top:98px;padding:13px 11px;border:1px solid #e4e8df;border-radius:13px;background:#fffefa;box-shadow:0 2px 8px #26372b08}
+.sidebar-window{display:flex;align-items:center;gap:10px;padding:7px 7px 16px;border-bottom:1px solid #e9ece5;text-align:left}
+.sidebar-window>span.sidebar-window-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:#eaf0e7;color:#365f43}
+.sidebar-window>div{display:grid;gap:4px;min-width:0}
+.sidebar-window>div>small{font-size:10px;color:#68766c}
+.sidebar-window>div>strong{overflow:hidden;color:#26362c;font-size:13px;font-weight:650;text-overflow:ellipsis;white-space:nowrap}
+.workbench-nav-label{margin:17px 9px 7px;color:#7b887d;font-size:10px;font-weight:650;letter-spacing:.8px}
+.workbench-sidebar nav{gap:4px;margin-top:0}
+.workbench-sidebar nav>button{position:relative;min-height:42px;padding:10px 10px;border-radius:8px;color:#58675d;font-size:12px;font-weight:500;transition:background-color .15s,color .15s}
+.workbench-sidebar nav>button>svg{flex:0 0 auto;color:#68796d}
+.workbench-sidebar nav>button.active{background:#e9f0e8;color:#234e35;font-weight:650}
+.workbench-sidebar nav>button.active>svg{color:#285b3e}
+.workbench-sidebar nav>button.active:before{position:absolute;top:9px;bottom:9px;left:0;width:3px;border-radius:0 3px 3px 0;background:#2d6846;content:''}
+.workbench-sidebar nav>button:hover:not(.active){background:#f1f3ee;color:#27372d}
+.workbench-sidebar nav>button>span:nth-of-type(1){min-width:0}
+.workbench-sidebar .nav-count{margin-left:auto;padding:2px 6px;border-radius:10px;background:#f5e8d8;color:#905520;font-size:10px;font-weight:650}
+
+.workbench-main{min-width:0}
+.workbench-title{min-height:64px;margin:0 0 20px;align-items:center}
+.workbench-title>div{min-width:0}
+.workbench-title-kicker{color:#68766c;font-size:11px;font-weight:600;letter-spacing:.35px}
+.workbench-title h1{margin:4px 0 5px;color:#202d24;font-size:28px;font-weight:650;letter-spacing:-.5px}
+.workbench-title>div>p:last-child{color:#66746a;font-size:12px}
+.workbench-refresh{min-height:37px;border-color:#d9dfd6;background:#fffefa;color:#405b48;font-size:12px;box-shadow:0 1px 2px #24372a08}
+.workbench-refresh:hover:not(:disabled){border-color:#9aaf9b;background:#f8faf6;color:#244b34}
+
+.overview-bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:stretch}
+.overview-card{position:relative;min-width:0;overflow:hidden;padding:21px 22px;border:1px solid #e3e7de;border-radius:13px;background:#fffefa;box-shadow:0 2px 8px #28372d08;transition:border-color .16s,box-shadow .16s,transform .16s}
+.overview-card:hover{transform:translateY(-1px);border-color:#d4ddd1;box-shadow:0 7px 20px #26372b10}
+.overview-card-topline{display:flex;align-items:center;justify-content:space-between;color:#64736a;font-size:11px;font-weight:650;letter-spacing:.2px}
+.overview-card-topline>span:first-child{display:flex;align-items:center;gap:9px}
+.overview-card-topline>span:first-child>i{color:#a0aaa0;font-size:10px;font-style:normal;font-variant-numeric:tabular-nums}
+.overview-card-topline>svg{color:#7c8d7e}
+.overview-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.overview-card-heading>div>span{display:block;margin-bottom:6px;color:#758278;font-size:10px;font-weight:600;letter-spacing:.55px}
+.overview-card-heading h2,.overview-revenue-card h2{display:flex;align-items:center;gap:7px;margin:0;color:#27352c;font-size:16px;font-weight:650;letter-spacing:-.2px}
+
+.overview-revenue-card{grid-column:span 7;min-height:218px;padding:23px 25px 18px;border-top:3px solid #2d6846}
+.overview-revenue-card h2{margin-top:18px;font-size:14px}
+.overview-revenue-value{display:flex;align-items:baseline;gap:7px;margin-top:1px;color:#1e3025;font-size:clamp(36px,3.3vw,48px);font-weight:650;letter-spacing:-1.8px;line-height:1.16;font-variant-numeric:tabular-nums}
+.overview-revenue-value>small{color:#bb7441;font-size:22px;font-weight:550;letter-spacing:0}
+.overview-revenue-caption{display:flex;align-items:center;gap:6px;margin:5px 0 14px;color:#68766c;font-size:11px}
+.overview-revenue-caption svg{color:#39714e}
+.overview-revenue-meta{display:flex;gap:26px;padding-top:12px;border-top:1px solid #eceee8}
+.overview-revenue-meta>div{display:flex;align-items:baseline;gap:8px}
+.overview-revenue-meta span{color:#6d7a70;font-size:10px}
+.overview-revenue-meta b{color:#36473b;font-size:13px;font-weight:650;font-variant-numeric:tabular-nums}
+.overview-revenue-meta small{margin-left:3px;color:#69766c;font-size:10px;font-weight:450}
+
+.overview-queue-card{grid-column:span 5;min-height:218px;padding:22px 23px;border-color:#244f3a;background:#214a36;color:#f7f7ef}
+.overview-queue-card:hover{border-color:#386c4c;box-shadow:0 8px 22px #173d2a24}
+.overview-queue-card .overview-card-topline{color:#d8e2d5}
+.overview-queue-card .overview-card-topline>span:first-child>i{color:#a4c2a9}
+.overview-live{display:flex;align-items:center;gap:6px;color:#d3dfd1;font-size:10px;font-weight:500;letter-spacing:0}
+.overview-live>i{width:6px;height:6px;border-radius:50%;background:#a6c88e;box-shadow:0 0 0 3px #a6c88e20}
+.overview-queue-total{display:flex;align-items:baseline;gap:10px;margin-top:16px}
+.overview-queue-total>strong{color:#fffdf3;font-size:43px;font-weight:650;letter-spacing:-1.4px;line-height:1;font-variant-numeric:tabular-nums}
+.overview-queue-total>span{color:#d9e4d6;font-size:13px}
+.overview-queue-caption{margin-top:5px;color:#c1d0c2;font-size:10px}
+.overview-queue-meter{display:flex;gap:3px;height:7px;margin-top:16px;overflow:hidden;border-radius:5px;background:#ffffff20}
+.overview-queue-meter>i{min-width:0;border-radius:5px;transition:width .25s ease}
+.overview-queue-meter .queue-pending{background:#eba965}.overview-queue-meter .queue-preparing{background:#a9c9a8}.overview-queue-meter .queue-ready{background:#e6dfba}
+.overview-queue-breakdown{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.overview-queue-breakdown>div{display:flex;justify-content:space-between;gap:5px;color:#d6e0d4;font-size:10px}
+.overview-queue-breakdown b{color:#fffdf3;font-size:12px;font-weight:650;font-variant-numeric:tabular-nums}
+
+.overview-trend-card{grid-column:span 7;min-height:305px;padding:21px 22px 13px}
+.overview-trend-total{display:grid;gap:3px;text-align:right}
+.overview-trend-total>b{color:#314a38;font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
+.overview-trend-total>small{color:#77837a;font-size:10px}
+.overview-trend-card .data-chart{height:222px;margin-top:1px}
+.overview-sales-card{grid-column:span 5;min-height:305px;padding:21px 20px 12px}
+.overview-sales-card .overview-card-heading h2 svg{color:#be733d}
+.overview-sales-card .data-chart{height:232px;margin-top:3px}
+.overview-card-note{align-self:center;color:#68766c;font-size:10px;white-space:nowrap}
+
+.overview-category-card{grid-column:span 5;min-height:235px;padding:20px 21px 14px}
+.overview-category-total{color:#304a38;font-size:21px;font-weight:650;font-variant-numeric:tabular-nums}
+.overview-category-total small{margin-left:3px;color:#69766c;font-size:10px;font-weight:500}
+.overview-category-card .data-chart{height:185px;margin-top:-2px}
+.overview-orders-card{grid-column:span 7;min-height:235px;padding:20px 22px 12px}
+.overview-all-orders{display:flex;align-items:center;gap:5px;padding:5px 0;border:0;background:transparent;color:#356648;font-size:11px;font-weight:600}
+.overview-all-orders:hover{color:#b36d36}
+.overview-order-row{display:flex;align-items:center;gap:11px;min-width:0;padding:11px 1px;border-bottom:1px solid #eef0ea}
+.overview-order-row:last-child{border-bottom:0}
+.overview-order-avatar{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;border-radius:9px;background:#eaf0e8;color:#315f43;font-size:12px;font-weight:650}
+.overview-order-info{display:grid;flex:1;gap:4px;min-width:0}
+.overview-order-info>b{overflow:hidden;color:#2d3a31;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.overview-order-info>span{color:#68766c;font-size:10px;font-variant-numeric:tabular-nums}
+.overview-orders-empty{display:flex;min-height:155px;align-items:center;justify-content:center;gap:9px;color:#6e7c72;font-size:12px}
+.overview-orders-empty svg{color:#8a9b8b}
+
+/* 其余工作台业务页共享更高对比度的表格、筛选器和订单操作样式。 */
+.workbench-order-filters{gap:7px;margin-bottom:17px}
+.workbench-order-filters button{border-color:#dfe4dc;background:#fffefa;color:#59675e;font-weight:550}
+.workbench-order-filters button:hover:not(.active){border-color:#9eafa0;color:#2d5339}
+.workbench-order-filters button.active{border-color:#285b3f;background:#285b3f;color:#fff;font-weight:650}
+.pickup-panel{border-color:#dfe6db;background:#fffefa;box-shadow:0 2px 8px #28372d08}
+.pickup-panel-icon{background:#e9f0e8;color:#326347}
+.pickup-panel h3{color:#2a382f;font-weight:650}
+.pickup-panel p{color:#66746a;line-height:1.7}
+.table-section-heading h3{color:#28372e;font-weight:650}
+.table-section-heading p{color:#66746a;line-height:1.65}
+.data-table-wrap{border-color:#e1e6dd;box-shadow:0 2px 8px #28372d08}
+.data-table thead{background:#f1f3ee}
+.data-table th{color:#4c5b50;font-weight:650}
+.data-table td{border-top-color:#ecefe9;color:#4e5d52}
+.data-table tbody tr:hover{background:#f8f9f5}
+.table-dish b{color:#29382e;font-weight:600}
+.table-dish small{color:#69776c}
+.table-price{color:#a6622f!important;font-weight:650}
+.low-stock{color:#a6522c;font-weight:650}
+.staff-order{border-color:#e1e6dd;box-shadow:0 2px 8px #28372d08}
+.staff-order-top>b{color:#2d3c32;font-weight:650}
+.staff-order-top small,.staff-order-meta>span,.staff-order-meta>p{color:#66746a}
+.staff-order-items span{color:#4c5e51}
+.staff-order-items b,.staff-order-bottom>b{color:#315c40}
+.staff-feedback{border-color:#e1e6dd;box-shadow:0 2px 8px #28372d08}
+.staff-feedback b{color:#2d5139;font-weight:650}
+.staff-feedback time{color:#66746a}
+.staff-feedback p{color:#34443a;line-height:1.85}
+.staff-feedback blockquote{background:#f3f5ef;border-left-color:#719377;color:#465a4a}
+.empty-state{border-color:#e2e7df;color:#66746a}
+.empty-state h3,.empty-state h2{color:#2c3b31}
+.empty-state p{color:#66746a}
+.status-badge{font-weight:600}
+
+@media(max-width:1250px){
+  .workbench-page{grid-template-columns:190px minmax(0,1fr);gap:21px;padding-right:27px;padding-left:27px}
+  .overview-card{padding-right:18px;padding-left:18px}
+  .overview-revenue-card,.overview-queue-card{min-height:208px}
+  .overview-trend-card,.overview-sales-card{min-height:285px}
+  .overview-trend-card .data-chart{height:205px}
+  .overview-sales-card .data-chart{height:213px}
+}
+@media(max-width:980px){
+  .workbench-page{grid-template-columns:160px minmax(0,1fr);gap:16px;padding-right:20px;padding-left:20px}
+  .overview-bento{gap:12px}
+  .overview-card{padding:17px 15px;border-radius:11px}
+  .overview-revenue-value{font-size:36px}
+  .overview-queue-total>strong{font-size:38px}
+  .overview-queue-breakdown>div{font-size:9px}
+  .overview-card-heading h2,.overview-revenue-card h2{font-size:14px}
+  .overview-trend-card .data-chart{height:195px}
+  .overview-sales-card .data-chart{height:205px}
+  .overview-category-card .data-chart{height:165px}
+  .overview-trend-card,.overview-sales-card{min-height:275px}
+  .overview-category-card,.overview-orders-card{min-height:220px}
+}
+@media(max-width:760px){
+  .workbench-page{grid-template-columns:minmax(0,1fr);gap:15px;padding:17px 20px 36px}
+  .workbench-sidebar{position:sticky;z-index:25;top:66px;padding:7px;border-radius:11px;box-shadow:0 4px 14px #26372b10}
+  .sidebar-window,.workbench-nav-label{display:none}
+  .workbench-sidebar nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .workbench-sidebar nav>button{justify-content:center;gap:5px;min-height:40px;padding:8px 5px;font-size:11px}
+  .workbench-sidebar nav>button>svg{width:15px;height:15px}
+  .workbench-sidebar nav>button.active:before{top:auto;right:18px;bottom:1px;left:18px;width:auto;height:2px}
+  .workbench-sidebar .nav-count{padding:1px 4px;font-size:9px}
+  .workbench-title{min-height:58px;margin-bottom:13px}
+  .workbench-title h1{font-size:24px}
+  .workbench-title-kicker{font-size:10px}
+  .workbench-title>div>p:last-child{font-size:11px}
+  .workbench-refresh{min-height:34px!important;padding:0 9px!important;font-size:11px!important}
+  .overview-bento{grid-template-columns:repeat(6,minmax(0,1fr));gap:11px}
+  .overview-revenue-card,.overview-trend-card,.overview-orders-card{grid-column:span 6}
+  .overview-queue-card,.overview-sales-card,.overview-category-card{grid-column:span 3}
+  .overview-revenue-card,.overview-queue-card{min-height:190px}
+  .overview-trend-card,.overview-sales-card{min-height:268px}
+  .overview-trend-card .data-chart{height:190px}
+  .overview-sales-card .data-chart{height:198px}
+  .overview-category-card .data-chart{height:157px}
+  .overview-category-card,.overview-orders-card{min-height:205px}
+  .workbench-order-filters{overflow:visible;flex-wrap:wrap;padding-bottom:0}
+}
+@media(max-width:530px){
+  .workbench-page{padding-right:14px;padding-left:14px}
+  .workbench-title{align-items:center}
+  .workbench-title h1{font-size:22px}
+  .workbench-title>div>p:last-child{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .overview-bento{grid-template-columns:minmax(0,1fr);gap:10px}
+  .overview-revenue-card,.overview-queue-card,.overview-trend-card,.overview-sales-card,.overview-category-card,.overview-orders-card{grid-column:1;min-height:unset}
+  .overview-revenue-card{padding:18px 18px 15px}
+  .overview-revenue-value{font-size:37px}
+  .overview-queue-card{padding:18px}
+  .overview-trend-card,.overview-sales-card,.overview-category-card,.overview-orders-card{padding:17px 16px 12px}
+  .overview-trend-card .data-chart{height:198px}
+  .overview-sales-card .data-chart{height:217px}
+  .overview-category-card .data-chart{height:185px}
+  .overview-order-row{gap:9px}
+  .overview-order-info>span{font-size:9px}
+  .staff-feedback{padding:17px}
+  .staff-feedback>div{flex-wrap:wrap}
+  .staff-feedback time{margin-left:auto}
+  .staff-feedback .status-badge{margin-left:auto}
+  .workbench-order-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .workbench-order-filters button{width:100%;padding-right:4px;padding-left:4px;text-align:center}
+  .data-table-wrap{overflow:visible;border:0;background:transparent;box-shadow:none}
+  .data-table{display:block;min-width:0;white-space:normal}
+  .data-table thead{display:none}
+  .data-table tbody{display:grid;gap:11px}
+  .data-table tbody tr{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;overflow:hidden;padding:10px 13px;border:1px solid #e1e6dd;border-radius:12px;background:#fffefa;box-shadow:0 2px 8px #28372d08}
+  .data-table tbody tr:hover{background:#fffefa}
+  .data-table td{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:7px;padding:8px 3px;border:0;white-space:normal;font-size:12px}
+  .data-table td::before{flex:0 0 auto;color:#78877c;font-size:10px;font-weight:650}
+  .data-table td:nth-child(2)::before{content:'分类'}
+  .data-table td:nth-child(3)::before{content:'单价'}
+  .data-table td:nth-child(4)::before{content:'库存'}
+  .data-table td:nth-child(5)::before{content:'状态'}
+  .data-table td:nth-child(6)::before{content:'操作'}
+  .data-table td:first-child{grid-column:1/-1;justify-content:flex-start;padding:4px 72px 12px 0;margin-bottom:3px;border-bottom:1px solid #ecefe9}
+  .data-table td:nth-child(6){position:absolute;top:14px;right:13px;justify-content:flex-end;padding:0}
+  .data-table td:nth-child(6)::before{display:none}
+  .table-dish{min-width:0;gap:10px}
+  .table-dish img{width:42px;height:42px}
+  .table-dish>div{min-width:0}
+  .table-dish b,.table-dish small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .status-toggle{gap:5px;font-size:11px}
+  .status-toggle>span{width:24px;height:14px}
+  .text-button{gap:4px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.overview-card,.workbench-sidebar nav>button,.overview-queue-meter>i{transition:none}}

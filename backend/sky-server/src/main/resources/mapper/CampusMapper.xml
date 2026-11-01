@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.CampusMapper">
+    <!-- 校园账号始终关联原 user 主键，保留原购物车与订单关系。 -->
+    <select id="account" resultType="com.sky.campus.CampusModels$Account">select * from campus_account where username=#{username}</select>
+    <select id="accountByUser" resultType="com.sky.campus.CampusModels$Account">select * from campus_account where user_id=#{userId}</select>
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">insert into user(openid,name,create_time) values(#{openid},#{name},#{createTime})</insert>
+    <insert id="insertAccount">insert into campus_account(user_id,username,password_hash,display_name,role,window_id,enabled) values(#{userId},#{username},#{passwordHash},#{displayName},#{role},#{windowId},1)</insert>
+    <select id="lockUser" resultType="long">select id from user where id=#{userId} for update</select>
+    <select id="windows" resultType="com.sky.campus.CampusModels$Window">select * from campus_window order by id</select>
+    <select id="window" resultType="com.sky.campus.CampusModels$Window">select * from campus_window where id=#{id}</select>
+    <sql id="dishQuery">
+        select d.*, c.name category_name, x.window_id, x.stock,x.calories,x.tags,
+               w.name window_name,w.canteen_name,
+               (select coalesce(sum(od.number),0) from order_detail od join orders o on o.id=od.order_id where od.dish_id=d.id and o.status=5) sold,
+               (select round(avg(r.rating),1) from campus_review r join order_detail od on od.order_id=r.order_id where od.dish_id=d.id) rating
+        from dish d join category c on c.id=d.category_id join campus_dish x on x.dish_id=d.id join campus_window w on w.id=x.window_id
+    </sql>
+    <select id="dishes" resultType="com.sky.campus.CampusModels$DishView"><include refid="dishQuery"/><where><if test="windowId != null">x.window_id=#{windowId}</if></where>order by d.id</select>
+    <select id="dish" resultType="com.sky.campus.CampusModels$DishView"><include refid="dishQuery"/> where d.id=#{id}</select>
+    <!-- 下单原子扣库存，回滚由同一个 MySQL 事务负责。 -->
+    <update id="takeStock">update campus_dish x join dish d on d.id=x.dish_id set x.stock=x.stock-#{quantity} where x.dish_id=#{dishId} and x.stock&gt;=#{quantity} and d.status=1</update>
+    <update id="restoreStock">update campus_dish set stock=stock+#{quantity} where dish_id=#{dishId}</update>
+    <select id="lockDish" resultType="long">select dish_id from campus_dish where dish_id=#{dishId} for update</select>
+    <update id="changeDish">update dish d join campus_dish x on x.dish_id=d.id set x.stock=#{change.stock},d.price=#{change.price},d.status=#{change.status},d.update_time=now(),d.update_user=#{userId} where d.id=#{change.id}</update>
+    <insert id="insertSlot">insert ignore into campus_slot(window_id,service_date,start_time,end_time,capacity,reserved) values(#{windowId},#{serviceDate},#{startTime},#{endTime},#{capacity},0)</insert>
+    <select id="slots" resultType="com.sky.campus.CampusModels$Slot">select * from campus_slot where window_id=#{windowId} and service_date=#{date} order by start_time</select>
+    <select id="lockSlot" resultType="com.sky.campus.CampusModels$Slot">select * from campus_slot where id=#{id} for update</select>
+    <update id="reserveSlot">update campus_slot set reserved=reserved+1 where id=#{id} and reserved&lt;capacity</update>
+    <update id="releaseSlot">update campus_slot set reserved=reserved-1 where id=#{id} and reserved&gt;0</update>
+    <insert id="insertOrder">insert into campus_order(order_id,user_id,window_id,slot_id,request_id,pickup_code,demo) values(#{orderId},#{userId},#{windowId},#{slotId},#{requestId},#{pickupCode},#{demo})</insert>
+    <select id="existingRequest" resultType="long">select order_id from campus_order where user_id=#{userId} and request_id=#{requestId}</select>
+    <sql id="orderQuery">
+        select o.id,o.number,o.status,o.user_id,o.amount,o.pay_status,o.pay_method,o.order_time,o.cancel_reason,o.remark,
+               a.display_name student_name,a.username student_no,
+               co.window_id,co.slot_id,co.pickup_code,co.demo,co.picked_up_at,w.canteen_name,w.name window_name,w.location,
+               s.service_date,s.start_time,s.end_time,exists(select 1 from campus_review r where r.order_id=o.id) reviewed
+        from orders o join campus_order co on co.order_id=o.id join campus_account a on a.user_id=o.user_id
+        join campus_window w on w.id=co.window_id join campus_slot s on s.id=co.slot_id
+    </sql>
+    <select id="orders" resultType="com.sky.campus.CampusModels$OrderView"><include refid="orderQuery"/><where><if test="userId != null">o.user_id=#{userId}</if><if test="windowId != null">and co.window_id=#{windowId}</if></where>order by o.id desc limit 100</select>
+    <select id="order" resultType="com.sky.campus.CampusModels$OrderView"><include refid="orderQuery"/> where o.id=#{id}</select>
+    <!-- 支付宝回调仅凭唯一商户订单号定位订单，后续状态仍在 Service 锁内校验。 -->
+    <select id="orderIdByNumber" resultType="long">select id from orders where number=#{number}</select>
+    <select id="lockOrder" resultType="long">select id from orders where id=#{id} for update</select>
+    <update id="setPickupCode">update campus_order set pickup_code=#{code} where order_id=#{id}</update>
+    <update id="reschedule">update campus_order co join orders o on o.id=co.order_id set co.slot_id=#{slotId},o.estimated_delivery_time=#{start} where co.order_id=#{id}</update>
+    <select id="orderByCode" resultType="long">select order_id from campus_order where pickup_code=#{code} <if test="windowId != null">and window_id=#{windowId}</if></select>
+    <update id="markPickedUp">update campus_order set picked_up_at=now() where order_id=#{id}</update>
+    <select id="expiredOrders" resultType="long">select o.id from orders o join campus_order co on co.order_id=o.id where o.status=1 and o.order_time&lt;#{before} limit 100</select>
+    <select id="favorites" resultType="long">select dish_id from campus_favorite where user_id=#{userId}</select>
+    <insert id="addFavorite">insert ignore into campus_favorite(user_id,dish_id) values(#{userId},#{dishId})</insert>
+    <delete id="deleteFavorite">delete from campus_favorite where user_id=#{userId} and dish_id=#{dishId}</delete>
+    <insert id="insertReview">insert into campus_review(order_id,user_id,rating,content) values(#{review.orderId},#{userId},#{review.rating},#{review.content})</insert>
+    <select id="notices" resultType="map">select id,title,content,category,date_format(published_at,'%Y-%m-%d') publishedAt from campus_notice order by published_at desc,id desc</select>
+    <insert id="insertFeedback">insert into campus_feedback(user_id,window_id,content) values(#{userId},#{feedback.windowId},#{feedback.content})</insert>
+    <select id="feedback" resultType="map">select f.id,f.content,f.reply,date_format(f.created_at,'%m-%d %H:%i') createdAt,a.display_name displayName,w.name windowName from campus_feedback f join campus_account a on a.user_id=f.user_id join campus_window w on w.id=f.window_id <where><if test="userId != null">f.user_id=#{userId}</if><if test="windowId != null">and f.window_id=#{windowId}</if></where> order by f.id desc limit 100</select>
+    <update id="replyFeedback">update campus_feedback set reply=#{reply.reply} where id=#{reply.id} <if test="windowId != null">and window_id=#{windowId}</if></update>
+    <!-- 看板来自数据库真实记录；窗口账号按绑定窗口统计，管理员空范围统计全校，金额只计已核销订单。 -->
+    <select id="summary" resultType="map">select count(*) totalOrders,coalesce(sum(case when date(o.order_time)=#{date} then 1 else 0 end),0) todayOrders,coalesce(sum(case when o.status=5 then o.amount else 0 end),0) revenue,coalesce(sum(case when o.status=2 then 1 else 0 end),0) pending,coalesce(sum(case when o.status=3 then 1 else 0 end),0) preparing,coalesce(sum(case when o.status=4 then 1 else 0 end),0) ready,coalesce(sum(case when o.status=5 then 1 else 0 end),0) completed from orders o join campus_order co on co.order_id=o.id where 1=1 <if test="windowId != null">and co.window_id=#{windowId}</if></select>
+    <select id="trend" resultType="map">select date_format(o.order_time,'%Y-%m-%d') day,coalesce(sum(o.amount),0) amount from orders o join campus_order co on co.order_id=o.id where 1=1 <if test="windowId != null">and co.window_id=#{windowId}</if> and o.status=5 and o.order_time&gt;=#{begin} group by day order by day</select>
+    <select id="sales" resultType="map">select od.name name,sum(od.number) value from order_detail od join orders o on o.id=od.order_id join campus_order co on co.order_id=o.id where 1=1 <if test="windowId != null">and co.window_id=#{windowId}</if> and o.status=5 group by od.dish_id,od.name order by value desc limit 6</select>
+    <select id="preferences" resultType="map">select c.name name,sum(od.number) value from order_detail od join orders o on o.id=od.order_id join campus_order co on co.order_id=o.id join dish d on d.id=od.dish_id join category c on c.id=d.category_id where 1=1 <if test="windowId != null">and co.window_id=#{windowId}</if> and o.status=5 group by c.id,c.name order by value desc</select>
+
+    <!-- 独立展示大屏只使用汇总字段，不返回任何学号、姓名或取餐凭证。 -->
+    <select id="windowOverview" resultType="map">
+      select w.id,w.name,w.canteen_name canteenName,w.location,
+        count(case when o.status between 1 and 5 then 1 end) reservations,
+        count(case when o.status=2 then 1 end) pending,
+        count(case when o.status=3 then 1 end) preparing,
+        count(case when o.status=4 then 1 end) ready,
+        count(case when o.status=5 then 1 end) completed
+      from campus_window w
+      left join campus_order co on co.window_id=w.id and co.slot_id in (select id from campus_slot where service_date=#{date})
+      left join orders o on o.id=co.order_id
+      group by w.id,w.name,w.canteen_name,w.location order by w.id
+    </select>
+    <select id="slotUsage" resultType="map">select coalesce(sum(reserved),0) occupied,coalesce(sum(capacity),0) capacity,count(*) publishedSlots from campus_slot where service_date=#{date}</select>
+    <select id="slotDistribution" resultType="map">select start_time name,sum(reserved) value from campus_slot where service_date=#{date} group by start_time order by start_time</select>
+    <select id="activity" resultType="map">select right(o.number,6) orderSuffix,w.name windowName,o.status,date_format(o.order_time,'%H:%i') orderTime,s.start_time pickupTime from orders o join campus_order co on co.order_id=o.id join campus_window w on w.id=co.window_id join campus_slot s on s.id=co.slot_id order by o.id desc limit 8</select>
+
+</mapper>
