@@ -43,7 +43,7 @@ public class AlipayGatewayService {
         AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
         model.setOutTradeNo(order.getNumber());
         model.setTotalAmount(order.getAmount().setScale(2, RoundingMode.HALF_UP).toPlainString());
-        model.setSubject("禾序食堂预约订单");
+        model.setSubject("饭点食堂预约订单");
         model.setBody("食堂预约取餐");
         model.setProductCode("QUICK_WAP_WAY");
         model.setTimeoutExpress("15m");

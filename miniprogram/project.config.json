@@ -1,7 +1,7 @@
 {
-  "description": "禾序食堂学生端微信小程序",
+  "description": "饭点学生端微信小程序",
   "appid": "touristappid",
-  "projectname": "hexu-canteen",
+  "projectname": "fandian-canteen",
   "compileType": "miniprogram",
   "miniprogramRoot": "./",
   "setting": {

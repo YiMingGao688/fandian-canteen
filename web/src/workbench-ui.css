@@ -1,4 +1,4 @@
-/* 禾序管理端：暖白工作区、墨绿导航与高对比经营数据。 */
+/* 饭点管理端：暖白工作区、墨绿导航与高对比经营数据。 */
 .workbench-page{width:100%;max-width:1540px;min-height:calc(100vh - 76px);grid-template-columns:210px minmax(0,1fr);gap:28px;padding:30px 36px 52px;align-items:start}
 .workbench-sidebar{position:sticky;top:98px;padding:13px 11px;border:1px solid #e4e8df;border-radius:13px;background:#fffefa;box-shadow:0 2px 8px #26372b08}
 .sidebar-window{display:flex;align-items:center;gap:10px;padding:7px 7px 16px;border-bottom:1px solid #e9ece5;text-align:left}

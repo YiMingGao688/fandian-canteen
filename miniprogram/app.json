@@ -1,6 +1,6 @@
 {
   "pages": ["pages/home/index", "pages/orders/index", "pages/notices/index", "pages/profile/index", "pages/login/index", "pages/checkout/index"],
-  "window": {"navigationBarTitleText": "禾序饭堂", "navigationBarBackgroundColor": "#f8f7f1", "navigationBarTextStyle": "black", "backgroundColor": "#f8f7f1", "backgroundTextStyle": "dark", "enablePullDownRefresh": true},
+  "window": {"navigationBarTitleText": "饭点", "navigationBarBackgroundColor": "#f8f7f1", "navigationBarTextStyle": "black", "backgroundColor": "#f8f7f1", "backgroundTextStyle": "dark", "enablePullDownRefresh": true},
   "tabBar": {
     "custom": true,
     "color": "#808a7c",
