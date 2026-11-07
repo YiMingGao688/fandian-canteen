@@ -1,7 +1,10 @@
 package com.sky.campus;
 
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.Mac;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -32,6 +35,14 @@ public final class CampusPassword {
         } catch (RuntimeException ex) {
             return false;
         }
+    }
+
+    /** 用服务端密钥绑定用户、密码和授权范围；重置密码、调岗或更换窗口后，旧令牌均失效。 */
+    public static String version(String secret,Long userId,String encoded,String role,Long windowId) {
+        try {
+            Mac mac=Mac.getInstance("HmacSHA256");mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),"HmacSHA256"));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(mac.doFinal((userId+":"+encoded+":"+role+":"+windowId).getBytes(StandardCharsets.UTF_8)));
+        }catch(Exception ex){throw new IllegalStateException("登录版本校验不可用",ex);}
     }
 
     /** 在 JDK 提供的算法中完成密码派生，使用后清除 PBE 参数内的密码字符。 */

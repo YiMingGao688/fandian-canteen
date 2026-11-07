@@ -1,0 +1,268 @@
+[
+  {
+    "id": "R01",
+    "title": "Restaurant Management Dashboard",
+    "author": "Oussama Saadoune",
+    "url": "https://dribbble.com/shots/24843829-Restaurant-Management-Dashboard",
+    "type": "餐饮运营"
+  },
+  {
+    "id": "R02",
+    "title": "Restaurant SaaS Dashboard | Spoon",
+    "author": "Design Studio",
+    "url": "https://dribbble.com/shots/23170655-Restaurant-SaaS-Dashboard-Spoon",
+    "type": "餐饮运营"
+  },
+  {
+    "id": "R03",
+    "title": "Restaurant POS Dashboard Design using Bento Grid",
+    "author": "Junaed Ahmed",
+    "url": "https://dribbble.com/shots/27319392-Restaurant-POS-Dashboard-Design-using-Bento-Grid",
+    "type": "Bento"
+  },
+  {
+    "id": "R04",
+    "title": "Bento Grid Dashboard",
+    "author": "Tasfia Barshat",
+    "url": "https://dribbble.com/shots/26364840--Bento-Grid-Dashboard",
+    "type": "Bento"
+  },
+  {
+    "id": "R05",
+    "title": "Bento grid & dashboard for revops startup",
+    "author": "Robin Holesinsky",
+    "url": "https://dribbble.com/shots/25765472-Bento-grid-dashboard-for-revops-startup",
+    "type": "Bento"
+  },
+  {
+    "id": "R06",
+    "title": "Minimal SaaS Dashboard, Clean UI & Visual Hierarchy",
+    "author": "Bea Grey",
+    "url": "https://dribbble.com/shots/26989557-Minimal-SaaS-Dashboard-Clean-UI-Visual-Hierarchy",
+    "type": "极简工作台"
+  },
+  {
+    "id": "R07",
+    "title": "SaaS Growth Dashboard UI – Bento Grid Analytics Exploration",
+    "author": "Nishi",
+    "url": "https://dribbble.com/shots/27215998-SaaS-Growth-Dashboard-UI-Bento-Grid-Analytics-Exploration",
+    "type": "经营分析"
+  },
+  {
+    "id": "R08",
+    "title": "AI Workforce Management Dashboard UI Design",
+    "author": "Nasrullah Emam",
+    "url": "https://dribbble.com/shots/27716395-AI-Workforce-Management-Dashboard-UI-Design",
+    "type": "AI Workspace"
+  },
+  {
+    "id": "R09",
+    "title": "Bento Grid Design",
+    "author": "Ionut Zamfir",
+    "url": "https://dribbble.com/shots/26595180-Bento-Grid-Design",
+    "type": "Bento"
+  },
+  {
+    "id": "R10",
+    "title": "Bento Features Section Exploration",
+    "author": "Seda Ulu",
+    "url": "https://dribbble.com/shots/27431597-Bento-Features-Section-Exploration",
+    "type": "Bento 组件"
+  },
+  {
+    "id": "R11",
+    "title": "Minimal Navigation",
+    "author": "Tran Mau Tri Tam",
+    "url": "https://dribbble.com/shots/17305696-Minimal-Navigation",
+    "type": "导航组件"
+  },
+  {
+    "id": "R12",
+    "title": "Floating App Navigation Concept",
+    "author": "Deverust Studio",
+    "url": "https://dribbble.com/shots/26779900-Floating-App-Navigation-Concept",
+    "type": "悬浮导航"
+  },
+  {
+    "id": "R13",
+    "title": "WhatTask: AI Virtual Office Workspace",
+    "author": "Vlad Goncharov / Flatonica",
+    "url": "https://dribbble.com/shots/26347120-WhatTask-AI-Virtual-Office-Workspace",
+    "type": "AI Workspace"
+  },
+  {
+    "id": "R14",
+    "title": "Navigation bar exploration",
+    "author": "Sankalp Sinha",
+    "url": "https://dribbble.com/shots/15104105-Navigation-bar-exploration-for-my-portfolio-redesign-project",
+    "type": "悬浮导航"
+  },
+  {
+    "id": "R15",
+    "title": "RestroQ – Restaurant Management & Admin Dashboard",
+    "author": "Wincasoft",
+    "url": "https://www.behance.net/gallery/242976195/RestroQ-Restaurant-Management-Admin-Dashboard",
+    "type": "餐饮运营"
+  },
+  {
+    "id": "R16",
+    "title": "Restaurant Management SaaS Platform | Analytics App POS",
+    "author": "Ruslan Kosinov",
+    "url": "https://www.behance.net/gallery/214478595/Restaurant-Management-SaaS-Platform-Analytics-App-POS",
+    "type": "餐饮运营"
+  },
+  {
+    "id": "R17",
+    "title": "Dashboard for restaurant",
+    "author": "Vitalii Kucherov",
+    "url": "https://www.behance.net/gallery/212513313/Dashboard-for-restaurant-by-Vitalii-Kucherov",
+    "type": "餐饮运营"
+  },
+  {
+    "id": "R18",
+    "title": "Orriso – AI Workspace & UX UI Dashboard Design",
+    "author": "Multiple Owners",
+    "url": "https://www.behance.net/gallery/240866253/Orriso-AI-Workspace-UX-UI-Dashboard-Design",
+    "type": "AI Workspace"
+  },
+  {
+    "id": "R19",
+    "title": "Dust Dashboard",
+    "author": "Dust / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/dust-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R20",
+    "title": "Wise Dashboard",
+    "author": "Wise / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/wise-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R21",
+    "title": "Stripe Invoices Dashboard",
+    "author": "Stripe / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/stripe-invoices-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R22",
+    "title": "Mixpanel Dashboard",
+    "author": "Mixpanel / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/mixpanel-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R23",
+    "title": "Lightdash KPI Dashboard",
+    "author": "Lightdash / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/lightdash-kpi-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R24",
+    "title": "Plausible Analytics Dashboard",
+    "author": "Plausible / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/plausible-analytics-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R25",
+    "title": "Unkey Dashboard",
+    "author": "Unkey / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/unkey-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R26",
+    "title": "Hyperline Dashboard",
+    "author": "Hyperline / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/hyperline-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R27",
+    "title": "Cal.com Bookings Dashboard",
+    "author": "Cal.com / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/cal-com-bookings-dashboard",
+    "type": "预约调度"
+  },
+  {
+    "id": "R28",
+    "title": "Routine Dashboard",
+    "author": "Routine / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/routine-dashboard",
+    "type": "极简工作台"
+  },
+  {
+    "id": "R29",
+    "title": "Checkout.com Payments Dashboard",
+    "author": "Checkout.com Payments / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/checkout-com-payments-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R30",
+    "title": "Remote Dashboard",
+    "author": "Remote / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/remote-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R31",
+    "title": "FlowMapp Dashboard",
+    "author": "FlowMapp / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/flowmapp-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R32",
+    "title": "Copperx Dashboard",
+    "author": "Copperx / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/copperx-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R33",
+    "title": "Hume AI Dashboard",
+    "author": "Hume AI / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/hume-ai-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R34",
+    "title": "Reducto Dashboard",
+    "author": "Reducto / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/reducto-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R35",
+    "title": "Atlas Dashboard",
+    "author": "Atlas / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/atlas-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R36",
+    "title": "Pitch Dashboard",
+    "author": "Pitch / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/pitch-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R37",
+    "title": "FullEnrich Enrichment Dashboard",
+    "author": "FullEnrich Enrichment / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/fullenrich-enrichment-dashboard",
+    "type": "真实 SaaS 截图"
+  },
+  {
+    "id": "R38",
+    "title": "Stripe Payment Dashboard",
+    "author": "Stripe Payment / SaaSFrame 收录",
+    "url": "https://www.saasframe.io/examples/stripe-stripe-payment-dashboard",
+    "type": "真实 SaaS 截图"
+  }
+]

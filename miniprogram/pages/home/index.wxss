@@ -1,0 +1,14 @@
+.hero{position:relative;height:310rpx;border-radius:26rpx;overflow:hidden;background:#e5ebda}.hero image{position:absolute;right:0;width:72%;height:100%;opacity:.72}.hero-copy{position:relative;padding:32rpx;background:linear-gradient(90deg,#e5ebda 12%,#e5ebdad9 50%,transparent)}.hero .title{font-size:43rpx;margin:12rpx 0}.windows{display:flex;gap:12rpx}.window{min-width:0;flex:1;padding:18rpx 14rpx;border:1rpx solid #e5e8dc;border-radius:17rpx;background:#fffef9}.window.selected{background:#eaf0e0;border-color:#99ae86}.window .tiny{font-size:20rpx;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.window-name{font-weight:600;font-size:25rpx;margin:7rpx 0}.search{background:#fffefa;padding:0 18rpx;border-radius:16rpx}.search input{border:0;background:transparent;flex:1;min-width:0;padding-left:0}.food{display:flex;gap:24rpx;padding:25rpx 0;border-bottom:1rpx solid #e8ebde}.food>image{width:180rpx;height:190rpx;border-radius:18rpx;flex-shrink:0}.food-info{flex:1;min-width:0}.food-info>.tiny{margin:6rpx 0}.food-name{font-weight:600;font-size:29rpx}.quantity{gap:14rpx}.quantity button{width:50rpx;height:50rpx;border-radius:50%;padding:0;line-height:50rpx;background:#31543b;color:white}.cart{position:fixed;left:24rpx;right:24rpx;background:#294b35;color:#fff;border-radius:22rpx;padding:16rpx 18rpx 16rpx 26rpx;display:flex;justify-content:space-between;align-items:center;box-shadow:0 8rpx 28rpx #213e2b30}.cart-note{font-size:22rpx;color:#cbd6be}.cart button{padding:18rpx 26rpx}
+
+
+/* 餐盘停在胶囊上方，列表底部为两处浮动操作留出空间。 */
+.page.tab-page.home {
+  padding-bottom: calc(168rpx + 68px);
+  padding-bottom: calc(168rpx + var(--hexu-tab-top));
+}
+
+.cart {
+  z-index: 10;
+  bottom: 76px;
+  bottom: calc(var(--hexu-tab-top) + 8px);
+}

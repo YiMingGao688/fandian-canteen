@@ -1,0 +1,153 @@
+.checkout-page {
+  padding: 22rpx 28rpx 150rpx;
+  padding-bottom: calc(150rpx + env(safe-area-inset-bottom, 0px));
+}
+
+.checkout-header {
+  margin: 0 2rpx 22rpx;
+}
+
+.checkout-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.checkout-badge {
+  flex: none;
+}
+
+.checkout-window {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4rpx 12rpx;
+  margin-top: 12rpx;
+  color: #647261;
+  font-size: 24rpx;
+}
+
+.checkout-window-name {
+  color: #3d5643;
+  font-weight: 600;
+}
+
+.checkout-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+  border-radius: 26rpx;
+}
+
+.checkout-times {
+  padding-top: 18rpx;
+}
+
+.checkout-section-title {
+  font-size: 27rpx;
+  font-weight: 650;
+}
+
+.checkout-caption,
+.checkout-item-count {
+  color: #637360;
+  font-size: 23rpx;
+}
+
+.checkout-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+
+.checkout-item + .checkout-item {
+  padding-top: 14rpx;
+  border-top: 1rpx solid #edf0e5;
+}
+
+.checkout-item-image {
+  flex: none;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  background: #edf0e5;
+}
+
+.checkout-item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 27rpx;
+  font-weight: 550;
+  overflow-wrap: break-word;
+}
+
+.checkout-item-count {
+  flex: none;
+}
+
+.checkout-remark {
+  height: 96rpx;
+  min-height: 96rpx;
+  margin-top: 12rpx;
+  padding: 14rpx 16rpx;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+
+.checkout-cutlery {
+  min-height: 44px;
+  margin-top: 14rpx;
+  padding-top: 10rpx;
+  border-top: 1rpx solid #edf0e5;
+  font-size: 25rpx;
+}
+
+.checkout-footer {
+  position: fixed;
+  z-index: 5;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  padding: 14rpx 28rpx 18rpx;
+  padding-bottom: calc(18rpx + env(safe-area-inset-bottom, 0px));
+  border-top: 1rpx solid #e7e9dd;
+  background: rgba(255, 254, 249, .94);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.checkout-total {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.checkout-price {
+  color: #294f39;
+  font-size: 40rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.checkout-submit {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 12rpx 20rpx;
+  border-radius: 18rpx;
+  background: #294f39;
+  color: #fff;
+  font-weight: 650;
+}
+
+button.checkout-submit[disabled] {
+  background: #e9eee3 !important;
+  color: #596955 !important;
+  opacity: 1 !important;
+}

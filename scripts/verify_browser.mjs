@@ -1,122 +1,127 @@
+// 只在临时 Vite 服务中验证 Web 入口与账号切换，接口响应由浏览器测试提供。
 import { chromium, expect } from '../web/node_modules/@playwright/test/index.mjs'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { createServer } from '../web/node_modules/vite/dist/node/index.js'
 import { fileURLToPath } from 'node:url'
 
-const output = fileURLToPath(new URL('../artifacts/', import.meta.url))
-const base = 'http://127.0.0.1:15173'
-await mkdir(output, { recursive: true })
-const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true })
-const results = [], errors = []
-const studentContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, deviceScaleFactor: 1 })
-const adminContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
-const screenContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
-const student = await studentContext.newPage(), admin = await adminContext.newPage(), screen = await screenContext.newPage()
-for (const page of [student, admin, screen]) page.on('pageerror', error => errors.push(`${page.url()}: ${error.message}`))
+const root = fileURLToPath(new URL('../web/', import.meta.url))
+const vite = await createServer({ root, logLevel: 'error', server: { host: '127.0.0.1', port: 0 } })
+const accounts = {
+  canteen_admin: { userId: 1, username: 'canteen_admin', displayName: '测试管理员', role: 'ADMIN' },
+  canteen_screen: { userId: 2, username: 'canteen_screen', displayName: '测试展示账号', role: 'SCREEN' },
+  '20260001': { userId: 3, username: '20260001', displayName: '测试学生', role: 'STUDENT' },
+}
+const windows = [{ id: 1, name: '测试窗口', canteenName: '测试食堂', location: '东区 · 一楼', enabled: 1 }]
+const fixtures = {
+  '/public/windows': windows,
+  '/staff/dashboard': { summary: {} },
+  '/staff/orders': [],
+  '/staff/menu': [],
+  '/staff/feedback': [],
+  '/screen/overview': { summary: {}, windows, slotUsage: { capacity: 20, occupied: 1 } },
+}
+const unexpected = []
+const errors = []
+let browser
+
+async function fixturePage(viewport) {
+  const page = await browser.newPage({ viewport })
+  page.context().on('page', tab => tab.on('pageerror', error => errors.push(error.message)))
+  page.on('pageerror', error => errors.push(error.message))
+  await page.context().route('**/campus/**', async route => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname.slice('/campus'.length)
+    if (path === '/auth/login' && request.method() === 'POST') {
+      const account = accounts[request.postDataJSON().username]
+      if (account) return route.fulfill({ json: { code: 1, data: { account, token: 'fixture-' + account.username } } })
+      return route.fulfill({ status: 401, json: { code: 0, msg: '账号或密码错误' } })
+    }
+    if (path === '/me' && request.method() === 'GET') {
+      const account = accounts[request.headers().authorization?.replace(/^Bearer fixture-/, '')]
+      if (account) return route.fulfill({ json: { code: 1, data: account } })
+      return route.fulfill({ status: 401, json: { code: 0, msg: '登录已过期' } })
+    }
+    if (request.method() === 'GET' && Object.hasOwn(fixtures, path)) {
+      return route.fulfill({ json: { code: 1, data: fixtures[path] } })
+    }
+    unexpected.push(request.method() + ' ' + path)
+    return route.fulfill({ status: 501, json: { code: 0, msg: '未配置的测试接口' } })
+  })
+  return page
+}
 
 async function check(name, action) {
   await action()
-  results.push({ name, passed: true })
   console.log('PASS', name)
-}
-async function noOverflow(page) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true)
 }
 
 try {
-  await student.goto(`${base}/`, { waitUntil: 'networkidle' })
-  await expect(student).toHaveURL(/#\/m/)
-  await check('手机 H5 展示校园窗口、菜品和固定手机导航', async () => {
-    await expect(student.locator('.phone-hero')).toBeVisible()
-    await expect(student.locator('.phone-dish')).toHaveCount(6)
-    await expect(student.locator('.phone-bottom-nav')).toBeVisible()
-    await noOverflow(student)
-  })
-  await student.screenshot({ path: output + 'mobile-h5.png' })
+  await vite.listen()
+  const base = 'http://127.0.0.1:' + vite.httpServer.address().port
+  browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true })
+  const mobile = await fixturePage({ width: 390, height: 844 })
+  const admin = await fixturePage({ width: 1440, height: 1000 })
+  const screen = await fixturePage({ width: 1440, height: 1000 })
+  const loginUrl = /#\/admin\/login$/
 
-  await student.locator('.phone-login').click()
-  await student.getByRole('button', { name: '使用学生体验账号', exact: true }).click()
-  await expect(student.locator('.phone-avatar')).toBeVisible()
-  await check('学生能在手机端加菜、选择取餐时段并提交预约', async () => {
-    const dish = student.locator('.phone-dish').filter({ hasText: '照烧鸡腿饭' })
-    await dish.getByRole('button', { name: '添加照烧鸡腿饭', exact: true }).click()
-    await dish.getByRole('button', { name: '添加照烧鸡腿饭', exact: true }).click()
-    await expect(dish.locator('.phone-quantity span')).toHaveText('2')
-    await student.getByRole('button', { name: /去预约/ }).click()
-    await expect(student.locator('.phone-cart-sheet')).toBeVisible()
-    await student.locator('.phone-sheet-time .date-switch').getByRole('button', { name: '明天' }).click()
-    await expect(student.locator('select[aria-label="取餐时段"]')).not.toHaveValue('')
-    await student.getByRole('button', { name: '确认预约', exact: true }).click()
-    await expect(student).toHaveURL(/#\/m\/orders/)
-    await expect(student.getByRole('button', { name: '去支付', exact: true }).first()).toBeVisible()
-  })
-  await student.getByRole('button', { name: '去支付', exact: true }).first().click()
-  await expect(student.locator('.order-card').first().locator('.status-badge')).toHaveText('等待接单')
-
-  await admin.goto(`${base}/`, { waitUntil: 'networkidle' })
-  await expect(admin).toHaveURL(/#\/admin\/login$/)
-  await expect(admin.getByRole('heading', { name: '管理员登录', exact: true })).toBeVisible()
-  await admin.getByRole('button', { name: '使用管理体验账号', exact: true }).click()
-  await check('PC 管理后台展示全校统计和 ECharts 经营图表', async () => {
-    await expect(admin.locator('.overview-bento > article')).toHaveCount(6)
-    await expect(admin.locator('.overview-revenue-card')).toBeVisible()
-    await expect(admin.locator('.overview-queue-card')).toBeVisible()
-    await expect(admin.locator('.data-chart canvas')).toHaveCount(3)
-    await expect(admin.locator('.workbench-sidebar')).toContainText('全校数据权限')
-    await noOverflow(admin)
-  })
-  await expect(admin.locator('.toast')).toBeHidden()
-  await admin.screenshot({ path: output + 'admin-web.png', fullPage: true })
-  await admin.locator('.workbench-sidebar nav').getByRole('button', { name: '预约订单', exact: true }).click()
-  const order = admin.locator('.staff-order').filter({ hasText: '林同学' }).first()
-  await check('管理员可在 PC 后台接单、完成备餐并核销手机端订单', async () => {
-    await expect(order.getByRole('button', { name: '接单并开始备餐' })).toBeVisible()
-    await order.getByRole('button', { name: '接单并开始备餐' }).click()
-    await order.getByRole('button', { name: '这一餐备好了' }).click()
-    await expect(order.locator('.status-badge')).toHaveText('待取餐')
-    await student.reload({ waitUntil: 'networkidle' })
-    await expect(student.locator('.order-card').first().locator('.status-badge')).toHaveText('待取餐')
-    const code = (await student.locator('.pickup-ticket strong').first().innerText()).replace(/\s+/g, '')
-    await admin.getByRole('textbox', { name: '学生取餐码' }).fill(code)
-    await admin.getByRole('button', { name: '确认核销', exact: true }).click()
-    await expect(admin.locator('.pickup-success')).toContainText('林同学')
-    await student.reload({ waitUntil: 'networkidle' })
-    await expect(student.locator('.order-card').first().locator('.status-badge')).toHaveText('已取餐')
-  })
-  await student.getByRole('button', { name: '评价这一餐' }).first().click()
-  await student.getByPlaceholder('味道、分量、服务，都可以聊聊。').fill('手机预约、窗口备餐和取餐核销都完成了。')
-  await student.getByRole('button', { name: '提交评价', exact: true }).click()
-  await expect(student.locator('.order-card').first()).toContainText('已评价')
-
-  await screen.goto(`${base}/#/screen`, { waitUntil: 'networkidle' })
-  await screen.getByRole('button', { name: '登录展示大屏', exact: true }).click()
-  await screen.getByRole('button', { name: '使用大屏展示体验账号', exact: true }).click()
-  await check('独立运营大屏显示全校窗口和五张真实 ECharts 图表', async () => {
-    await expect(screen.locator('.operations-screen')).toBeVisible()
-    await expect(screen.locator('.site-header')).toHaveCount(0)
-    await expect(screen.locator('.screen-metrics article')).toHaveCount(5)
-    await expect(screen.locator('.screen-scene-label')).toHaveCount(3)
-    await expect(screen.locator('.screen-scene canvas')).toHaveCount(1)
-    await expect(screen.locator('.screen-chart canvas')).toHaveCount(5)
-    await expect(screen.locator('.screen-footer')).toContainText('不含学生个人信息')
-    await noOverflow(screen)
-  })
-  await expect(screen.locator('.toast')).toBeHidden()
-  await screen.screenshot({ path: output + 'operations-screen.png', fullPage: true })
-  await screen.locator('.screen-day-switch').getByRole('button', { name: '今日', exact: true }).click()
-  await expect(screen.locator('.screen-day-switch').getByRole('button', { name: '今日', exact: true })).toHaveClass(/active/)
-  await screen.locator('.screen-toolbar').getByRole('button', { name: '刷新' }).click()
-  await screen.setViewportSize({ width: 390, height: 844 })
-  await check('运营大屏缩窄窗口后可堆叠显示且没有横向溢出', async () => {
-    await noOverflow(screen)
-    await expect(screen.locator('.screen-layout')).toBeVisible()
+  await check('窄屏首页与旧学生网页地址进入管理登录', async () => {
+    for (const path of ['/', '/#/m', '/#/m/orders', '/#/m/notices', '/#/m/profile', '/#/orders', '/#/notices']) {
+      await mobile.goto(base + path)
+      await expect(mobile).toHaveURL(loginUrl)
+      await expect(mobile.getByRole('heading', { name: '管理员登录' })).toBeVisible()
+    }
   })
 
-  await check('三类入口浏览器运行无未处理 JavaScript 错误', async () => {
-    expect(errors).toEqual([])
+  await check('旧学生会话清理，学生登录提示改用微信小程序', async () => {
+    await mobile.evaluate(session => sessionStorage.setItem('hexu.session', JSON.stringify(session)), {
+      account: accounts['20260001'], token: 'fixture-20260001',
+    })
+    await mobile.reload()
+    await expect(mobile).toHaveURL(loginUrl)
+    await expect(mobile.getByRole('heading', { name: '管理员登录' })).toBeVisible()
+    expect(await mobile.evaluate(() => sessionStorage.getItem('hexu.session'))).toBeNull()
+    await mobile.getByLabel('管理或展示账号').fill('20260001')
+    await mobile.getByLabel('密码', { exact: true }).fill('test-password')
+    await mobile.getByRole('button', { name: '登录饭点', exact: true }).click()
+    await expect(mobile.getByRole('status')).toContainText('学生点餐请使用微信小程序')
+    await expect(mobile).toHaveURL(loginUrl)
   })
-  const report = { passed: results.length, failed: 0, checks: results, errors, screenshots: ['mobile-h5.png', 'admin-web.png', 'operations-screen.png'] }
-  await writeFile(output + 'browser-verification.json', JSON.stringify(report, null, 2), 'utf8')
-  console.log(JSON.stringify({ passed: report.passed, failed: report.failed, errors }))
+
+  await check('管理员登录和刷新后可进入后台，并可打开大屏', async () => {
+    await admin.goto(base + '/')
+    await expect(admin).toHaveURL(loginUrl)
+    await admin.getByRole('button', { name: '使用管理体验账号', exact: true }).click()
+    await expect(admin.locator('.premium-overview')).toBeVisible()
+    await admin.reload()
+    await expect(admin.locator('.premium-overview')).toBeVisible()
+    await admin.locator('.admin-header-account summary').click()
+    const [popup] = await Promise.all([
+      admin.waitForEvent('popup'),
+      admin.getByRole('link', { name: '运营数据大屏' }).click(),
+    ])
+    await expect(popup).toHaveURL(/#\/screen$/)
+    await expect(popup.locator('.screen-metrics')).toBeVisible()
+    await popup.close()
+  })
+
+  await check('大屏账号可独立登录，进入管理地址时要求工作账号', async () => {
+    await screen.goto(base + '/#/screen')
+    await screen.getByRole('button', { name: '登录展示大屏', exact: true }).click()
+    await screen.getByRole('button', { name: '使用大屏展示体验账号', exact: true }).click()
+    await expect(screen.locator('.screen-metrics')).toBeVisible()
+    await screen.goto(base + '/#/admin')
+    await expect(screen).toHaveURL(loginUrl)
+  })
+
+  await check('管理会话过期后回到管理登录', async () => {
+    await admin.evaluate(account => sessionStorage.setItem('hexu.session', JSON.stringify({ account, token: 'expired' })), accounts.canteen_admin)
+    await admin.reload()
+    await expect(admin).toHaveURL(loginUrl)
+    await expect(admin.getByRole('heading', { name: '管理员登录' })).toBeVisible()
+  })
+
+  expect(unexpected).toEqual([])
+  expect(errors).toEqual([])
 } finally {
-  await browser.close()
+  await browser?.close()
+  await vite.close()
 }

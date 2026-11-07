@@ -1,0 +1,1 @@
+{"desc": "学生端无需搜索索引", "rules": [{"action": "disallow", "page": "*"}]}

@@ -80,10 +80,11 @@ public class CampusAuthService {
         if (request.getPassword() == null || request.getPassword().length() < 8 || request.getPassword().length() > 64) throw new BaseException("密码长度应为 8 至 64 位");
     }
 
-    /** 令牌仅承载用户主键和校园作用域，不包含密码、手机号和客户端可改写的角色。 */
+    /** 令牌携带主键、校园作用域及密码/授权范围的密钥签名版本，不包含密码摘要或客户端可改写的角色。 */
     private LoginResult issue(Account account) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", account.getUserId()); claims.put("scope", "campus");
+        claims.put("credential", CampusPassword.version(secret,account.getUserId(),account.getPasswordHash(),account.getRole(),account.getWindowId()));
         LoginResult result = new LoginResult();
         result.setToken(JwtUtil.createJWT(secret, 7200000, claims));
         account.setPasswordHash(null); result.setAccount(account);

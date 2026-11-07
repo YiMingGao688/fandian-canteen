@@ -1,0 +1,20 @@
+{
+  "pages": ["pages/home/index", "pages/orders/index", "pages/notices/index", "pages/profile/index", "pages/login/index", "pages/checkout/index"],
+  "window": {"navigationBarTitleText": "禾序饭堂", "navigationBarBackgroundColor": "#f8f7f1", "navigationBarTextStyle": "black", "backgroundColor": "#f8f7f1", "backgroundTextStyle": "dark", "enablePullDownRefresh": true},
+  "tabBar": {
+    "custom": true,
+    "color": "#808a7c",
+    "selectedColor": "#294e39",
+    "backgroundColor": "#fffef9",
+    "borderStyle": "white",
+    "list": [
+      {"pagePath": "pages/home/index", "text": "点餐"},
+      {"pagePath": "pages/orders/index", "text": "预约"},
+      {"pagePath": "pages/notices/index", "text": "公告"},
+      {"pagePath": "pages/profile/index", "text": "我的"}
+    ]
+  },
+  "usingComponents": {},
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

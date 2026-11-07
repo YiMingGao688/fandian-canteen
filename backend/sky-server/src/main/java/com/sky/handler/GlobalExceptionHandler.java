@@ -6,6 +6,9 @@ import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -15,6 +18,13 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    /** multipart 在控制器映射前解析；超限异常必须全局处理，才能返回页面可读的统一错误。 */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+    public Result<Void> oversizedUpload(MaxUploadSizeExceededException ex) {
+        return Result.error("图片过大，请在页面中重新选择并压缩上传");
+    }
 
     /**
      * 捕获业务异常

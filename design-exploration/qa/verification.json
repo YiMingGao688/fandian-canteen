@@ -1,0 +1,457 @@
+{
+  "checkedAt": "2026-11-05T06:13:37.708Z",
+  "browser": "Microsoft Edge / Playwright",
+  "scope": "Standalone prototypes only",
+  "pages": [
+    {
+      "id": "01",
+      "name": "禾序 · Grove Desk",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1274
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "02",
+      "name": "Service · 出餐现场",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1398
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "03",
+      "name": "Ledger · 经营手记",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1332
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "04",
+      "name": "Quiet · 极简工作区",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1282
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "05",
+      "name": "Float · 浮岛经营台",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1000
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "06",
+      "name": "Night Pass · 夜班值守",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1386
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "07",
+      "name": "Campus · 多窗口视角",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1357
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "08",
+      "name": "Tempo · 预约节奏",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1263
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "09",
+      "name": "Signal · 情境工作台",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1129
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "10",
+      "name": "Pantry · 餐饮品牌运营",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1287
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    },
+    {
+      "id": "11",
+      "name": "Studio · 融合经营台",
+      "jsErrors": [],
+      "externalRequests": [],
+      "checks": [
+        "scope: all -> window 1 -> all",
+        "trend: 7 -> 14 days",
+        "order drawer + Escape",
+        "keyboard search -> inventory",
+        "local CSV export",
+        "local order state: pending -> preparing",
+        "feedback mock form",
+        "top nav + Bento + separate toolbar",
+        "focus mode enter + exit",
+        "toolbar pending action",
+        "toolbar search",
+        "view refresh preserves scroll"
+      ],
+      "desktop": {
+        "width": 1440,
+        "scroll": 1440,
+        "overflow": false,
+        "offenders": [],
+        "height": 1000
+      },
+      "tablet": {
+        "width": 1024,
+        "scroll": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      "mobile": {
+        "width": 390,
+        "scroll": 390,
+        "overflow": false,
+        "offenders": []
+      }
+    }
+  ],
+  "errors": [],
+  "dataChecks": [
+    {
+      "key": "revenue",
+      "summary": 18624,
+      "windowSum": 18624,
+      "pass": true
+    },
+    {
+      "key": "totalOrders",
+      "summary": 1258,
+      "windowSum": 1258,
+      "pass": true
+    },
+    {
+      "key": "todayOrders",
+      "summary": 186,
+      "windowSum": 186,
+      "pass": true
+    },
+    {
+      "key": "completed",
+      "summary": 1016,
+      "windowSum": 1016,
+      "pass": true
+    },
+    {
+      "key": "pending",
+      "summary": 18,
+      "windowSum": 18,
+      "pass": true
+    },
+    {
+      "key": "preparing",
+      "summary": 32,
+      "windowSum": 32,
+      "pass": true
+    },
+    {
+      "key": "ready",
+      "summary": 14,
+      "windowSum": 14,
+      "pass": true
+    },
+    {
+      "key": "categoryTotal",
+      "pass": true
+    }
+  ],
+  "galleryMobile": {
+    "width": 390,
+    "scroll": 390,
+    "overflow": false,
+    "offenders": []
+  },
+  "galleryChecks": [
+    "11 entries",
+    "group filters",
+    "two-way compare",
+    "mobile layout"
+  ],
+  "researchChecks": {
+    "visualCases": 20,
+    "restrictedLinks": 18
+  },
+  "businessSourceCheck": {
+    "files": 192,
+    "changed": [],
+    "pass": true
+  },
+  "pass": true
+}

@@ -28,7 +28,7 @@ public class CampusRealm extends AuthorizingRealm {
     @Override
     public boolean supports(AuthenticationToken token) { return token instanceof CampusToken; }
 
-    /** JWT 过期、签名错误、账号停用均拒绝；不信任客户端声称的角色。 */
+    /** JWT 过期、签名错误、停用或密码/授权版本变化均拒绝；角色及窗口权限每次重新读取数据库。 */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         try {
@@ -36,6 +36,8 @@ public class CampusRealm extends AuthorizingRealm {
             if (!"campus".equals(claims.get("scope"))) throw new AuthenticationException("令牌类型不匹配");
             Account account = mapper.accountByUser(Long.valueOf(claims.get("uid").toString()));
             if (account == null || !Integer.valueOf(1).equals(account.getEnabled())) throw new AuthenticationException("账号不可用");
+            String version=CampusPassword.version(secret,account.getUserId(),account.getPasswordHash(),account.getRole(),account.getWindowId());
+            if(!version.equals(claims.get("credential")))throw new AuthenticationException("密码或权限已更新，请重新登录");
             account.setPasswordHash(null);
             return new SimpleAuthenticationInfo(account, token.getCredentials(), getName());
         } catch (Exception ex) {

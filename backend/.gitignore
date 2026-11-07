@@ -4,3 +4,7 @@
 *.class
 *Test.java
 **/test/
+
+# 校园菜品的可复跑回归测试属于源码，不沿用上游忽略全部测试的规则。
+!sky-server/src/test/
+!sky-server/src/test/**

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.CampusOperationsMapper">
+    <sql id="accountWhere">
+        where a.role in ('ADMIN','STAFF','SCREEN')
+        <if test="query.role != null">and a.role=#{query.role}</if>
+        <if test="query.enabled != null">and a.enabled=#{query.enabled}</if>
+        <if test="query.keyword != null">and (a.username like concat('%',#{query.keyword},'%') or a.display_name like concat('%',#{query.keyword},'%') or w.name like concat('%',#{query.keyword},'%') or w.canteen_name like concat('%',#{query.keyword},'%'))</if>
+    </sql>
+    <select id="accountCount" resultType="long">select count(*) from campus_account a left join campus_window w on w.id=a.window_id <include refid="accountWhere"/></select>
+    <select id="accountPage" resultType="com.sky.campus.CampusOperationsModels$ManagedAccount">
+        select a.user_id,a.username,a.display_name,a.role,a.window_id,a.enabled,w.name window_name,w.canteen_name,u.create_time
+        from campus_account a join user u on u.id=a.user_id left join campus_window w on w.id=a.window_id
+        <include refid="accountWhere"/> order by a.user_id limit #{query.pageSize} offset #{query.offset}
+    </select>
+    <select id="lockAdministrators" resultType="long">select user_id from campus_account where role='ADMIN' order by user_id for update</select>
+    <select id="lockManagedAccount" resultType="com.sky.campus.CampusModels$Account">select * from campus_account where user_id=#{id} and role in ('ADMIN','STAFF','SCREEN') for update</select>
+    <update id="updateAccount">update campus_account set display_name=#{displayName},role=#{role},window_id=#{windowId},enabled=#{enabled} where user_id=#{userId}</update>
+    <update id="updateAccountEnabled">update campus_account set enabled=#{enabled} where user_id=#{id}</update>
+    <update id="updateUserName">update user set name=#{name} where id=#{id}</update>
+    <update id="resetPassword">update campus_account set password_hash=#{passwordHash} where user_id=#{id} and role in ('ADMIN','STAFF','SCREEN')</update>
+    <select id="enabledAdministratorCount" resultType="int">select count(*) from campus_account where role='ADMIN' and enabled=1 for update</select>
+    <insert id="insertWindow" useGeneratedKeys="true" keyProperty="id">insert into campus_window(canteen_name,name,location,description,capacity,opening_hours,enabled) values(#{canteenName},#{name},#{location},#{description},#{capacity},#{openingHours},#{enabled})</insert>
+    <update id="updateWindow">update campus_window set canteen_name=#{canteenName},name=#{name},location=#{location},description=#{description},capacity=#{capacity},opening_hours=#{openingHours},enabled=#{enabled} where id=#{id}</update>
+    <update id="updateWindowEnabled">update campus_window set enabled=#{enabled} where id=#{id}</update>
+    <sql id="orderFrom">from orders o join campus_order co on co.order_id=o.id join campus_account a on a.user_id=o.user_id join campus_window w on w.id=co.window_id join campus_slot s on s.id=co.slot_id</sql>
+    <sql id="orderWhere">
+        where 1=1
+        <if test="query.windowId != null">and co.window_id=#{query.windowId}</if>
+        <choose><when test="query.state == 'active'">and o.status in (2,3,4)</when><when test="query.state != 'all'">and o.status=#{query.state}</when></choose>
+        <if test="query.fromDate != null">and s.service_date &gt;=#{query.fromDate}</if>
+        <if test="query.toDate != null">and s.service_date &lt;=#{query.toDate}</if>
+        <if test="query.keyword != null">and (a.display_name like concat('%',#{query.keyword},'%') or a.username like concat('%',#{query.keyword},'%') or o.number like concat('%',#{query.keyword},'%') or w.name like concat('%',#{query.keyword},'%') or w.canteen_name like concat('%',#{query.keyword},'%') or exists(select 1 from order_detail od where od.order_id=o.id and od.name like concat('%',#{query.keyword},'%')))</if>
+    </sql>
+    <select id="orderCount" resultType="long">select count(*) <include refid="orderFrom"/> <include refid="orderWhere"/></select>
+    <select id="orderPage" resultType="com.sky.campus.CampusModels$OrderView">
+        <include refid="com.sky.mapper.CampusMapper.orderQuery"/> <include refid="orderWhere"/>
+        order by case o.status when 2 then 0 when 3 then 1 when 4 then 2 when 1 then 3 when 5 then 4 else 5 end,
+        case when o.status in (2,3,4) then timestamp(s.service_date,s.end_time) end asc,o.id desc
+        limit #{query.pageSize} offset #{query.offset}
+    </select>
+    <select id="pageOrderDetails" resultType="com.sky.entity.OrderDetail">select * from order_detail where order_id in <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach> order by order_id,id</select>
+</mapper>

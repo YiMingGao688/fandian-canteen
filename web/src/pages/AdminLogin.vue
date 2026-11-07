@@ -1,6 +1,6 @@
 <script setup>
 import { defineAsyncComponent, onMounted } from 'vue'
-import { Leaf } from '@lucide/vue'
+import BrandLogo from '../components/BrandLogo.vue'
 import { state } from '../state'
 
 const AdminLoginCanteen = defineAsyncComponent(() => import('../components/AdminLoginCanteen.vue'))
@@ -38,7 +38,7 @@ onMounted(() => {
       </g>
     </svg>
     <AdminLoginCanteen />
-    <header class="admin-login-brand"><span><Leaf :size="24" /></span><b>禾序食堂管理</b><small>HEXU · ADMINISTRATION</small></header>
+    <header class="admin-login-brand"><BrandLogo badge /><small>饭点 · 管理工作台</small></header>
     <div class="admin-login-copy">
       <p>OPERATIONS CONSOLE · SECURE ACCESS</p>
       <h1>食堂运营管理</h1>

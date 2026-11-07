@@ -1,0 +1,22 @@
+<view wx:if="{{!hidden}}" class="glass-tab-shade" aria-hidden="true" />
+<view wx:if="{{!hidden}}" class="glass-tab-bar" aria-label="底部导航">
+  <button
+    wx:for="{{tabs}}"
+    wx:key="pagePath"
+    class="glass-tab-item {{selected === index ? 'glass-tab-selected' : ''}}"
+    data-index="{{index}}"
+    bindtap="openTab"
+    hover-class="glass-tab-pressed"
+    hover-start-time="12"
+    hover-stay-time="75"
+    aria-label="{{item.text + (selected === index ? '，当前标签' : '')}}"
+  >
+    <image
+      class="glass-tab-icon"
+      src="{{'/assets/tab-bar/' + item.icon + (selected === index ? '-selected' : '') + '.svg'}}"
+      mode="aspectFit"
+      aria-hidden="true"
+    />
+    <text class="glass-tab-label">{{item.text}}</text>
+  </button>
+</view>

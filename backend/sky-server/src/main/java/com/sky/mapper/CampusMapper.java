@@ -38,6 +38,36 @@ public interface CampusMapper {
     Long lockDish(@Param("dishId") Long dishId);
     /** 维护窗口菜品的库存、价格与上下架状态。 */
     void changeDish(@Param("change") DishChange change, @Param("userId") Long userId);
+    /** 读取菜品分类及引用数量，套餐分类不进入校园菜品编辑器。 */
+    List<MenuCategory> menuCategories();
+    /** 写入前锁住分类，避免新增菜品与删除分类并发造成孤立分类引用。 */
+    MenuCategory lockMenuCategory(@Param("id") Long id);
+    /** 按原表字符排序规则检查名称重复；数据库唯一索引仍作为并发兜底。 */
+    int dishNameExists(@Param("name") String name, @Param("excludeId") Long excludeId);
+    /** 创建原菜品成功后，在同一事务内补充所属窗口、库存和营养标签。 */
+    void insertCampusDish(@Param("id") Long id, @Param("dish") DishSave dish);
+    /** 修改扩展信息；未提交库存时保留锁内最新值，避免覆盖并发下单扣减。 */
+    void updateCampusDish(@Param("id") Long id, @Param("dish") DishSave dish);
+    /** 保护历史订单快照与套餐引用，有任一引用时禁止物理删除。 */
+    int dishReferences(@Param("id") Long id);
+    /** 删除无历史引用菜品时，清理购物车、收藏、口味及校园关联。 */
+    void deleteDishCart(@Param("id") Long id);
+    /** 移除失效菜品的学生收藏，不影响学生其他收藏。 */
+    void deleteDishFavorites(@Param("id") Long id);
+    /** 移除原苍穹菜品口味记录，避免遗留悬空主键。 */
+    void deleteDishFlavors(@Param("id") Long id);
+    /** 删除校园库存关联后，服务层再删除原 dish；两步处于同一事务。 */
+    void deleteCampusDish(@Param("id") Long id);
+    /** 新增菜品分类并回填原 category 主键，固定 type=1，记录当前操作人。 */
+    void insertMenuCategory(@Param("category") MenuCategory category, @Param("userId") Long userId);
+    /** 修改现有菜品分类的名称、排序、状态，不改变类型及菜品归属。 */
+    void updateMenuCategory(@Param("category") MenuCategory category, @Param("userId") Long userId);
+    /** 校验分类名称的全局唯一性，兼容原有套餐分类的名称约束。 */
+    int categoryNameExists(@Param("name") String name, @Param("excludeId") Long excludeId);
+    /** 删除分类前检查全部原菜品及套餐引用，避免破坏历史关联。 */
+    int categoryReferences(@Param("id") Long id);
+    /** 仅删除 type=1 的菜品分类；服务层负责管理员权限和无引用校验。 */
+    void deleteMenuCategory(@Param("id") Long id);
     /** 根据窗口与日期幂等创建时段，已有预约名额保持不变。 */
     void insertSlot(Slot slot);
     /** 查询一天的所有取餐时段。 */

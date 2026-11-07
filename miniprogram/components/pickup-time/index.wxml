@@ -1,0 +1,50 @@
+<view class="pickup-picker">
+  <text class="pickup-label">取餐日期</text>
+  <view class="pickup-grid">
+    <button
+      wx:for="{{dateOptions}}"
+      wx:key="key"
+      class="pickup-choice pickup-date {{index === dateIndex ? 'pickup-selected' : ''}}"
+      data-index="{{index}}"
+      disabled="{{busy}}"
+      bindtap="selectDate"
+    >
+      <text class="pickup-date-name">{{item.name}}</text>
+      <text class="pickup-caption">{{item.date}}</text>
+      <text wx:if="{{index === dateIndex}}" class="pickup-date-check" aria-hidden="true">✓</text>
+    </button>
+  </view>
+
+  <view class="pickup-slot-heading">
+    <text class="pickup-label">取餐时段</text>
+    <text wx:if="{{slots.length && !loading}}" class="pickup-caption">{{slots.length}} 个可选</text>
+  </view>
+  <view wx:if="{{loading}}" class="pickup-empty">正在查看可预约时段…</view>
+  <view wx:elif="{{failed}}" class="pickup-empty">
+    <text>时段加载失败</text>
+    <button class="pickup-text-button" disabled="{{busy}}" bindtap="retry">重试</button>
+  </view>
+  <block wx:elif="{{slots.length}}">
+    <view class="pickup-grid">
+      <block wx:for="{{slots}}" wx:key="id">
+        <button
+          wx:if="{{expanded || index < 4 || index === slotIndex}}"
+          class="pickup-choice pickup-slot {{index === slotIndex ? 'pickup-selected' : ''}}"
+          data-index="{{index}}"
+          disabled="{{busy}}"
+          bindtap="selectSlot"
+        >
+          <text class="pickup-slot-time">{{item.startTime}} – {{item.endTime}}</text>
+          <text class="pickup-caption">{{item.isCurrent ? '原预约时段' : ('余 ' + (item.capacity - item.reserved) + ' 位')}}</text>
+        </button>
+      </block>
+    </view>
+    <button wx:if="{{slots.length > 4}}" class="pickup-text-button pickup-more" disabled="{{busy}}" bindtap="toggleSlots">
+      {{expanded ? '收起时段' : '查看全部 ' + slots.length + ' 个时段'}}
+    </button>
+  </block>
+  <view wx:else class="pickup-empty">
+    <text>{{dateIndex === 0 ? '今天' : '明天'}}暂无可预约时段</text>
+    <button wx:if="{{dateIndex === 0 && dateOptions.length > 1}}" class="pickup-text-button" data-index="1" disabled="{{busy}}" bindtap="selectDate">看明天 →</button>
+  </view>
+</view>

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
-import { ArrowUpRight, Clock3, LayoutDashboard, Leaf, MapPin, Maximize, Minimize, RefreshCw, ShieldCheck, Ticket } from '@lucide/vue'
+import { ArrowUpRight, Clock3, LayoutDashboard, MapPin, Maximize, Minimize, RefreshCw, ShieldCheck, Ticket } from '@lucide/vue'
+import BrandLogo from '../components/BrandLogo.vue'
 import ScreenChart from '../components/ScreenChart.vue'
 import MechanicalPanel from '../components/MechanicalPanel.vue'
 import { state, api, money, dateString, statusText } from '../state'
@@ -112,10 +113,10 @@ onUnmounted(() => {
         <circle cx="12" cy="13" r="4" fill="#101f28" /><circle cx="12" cy="13" r="2.8" fill="#405657" /><path d="M10.5 12.5H13.5" stroke="#a5afa0" stroke-opacity=".6" />
         <path d="M10 41V49M14 37V45" stroke="#74908b" stroke-opacity=".45" />
       </svg>
-      <span class="frame-axis frame-axis-left">HEXU / DINING INTELLIGENCE</span><span class="frame-axis frame-axis-right">CAMPUS OPERATIONS · 01</span>
+      <span class="frame-axis frame-axis-left">FANDIAN / DINING INTELLIGENCE</span><span class="frame-axis frame-axis-right">CAMPUS OPERATIONS · 01</span>
     </div>
     <header class="screen-header">
-      <div class="screen-brand"><span class="screen-brand-mark"><Leaf :size="27" /></span><div><p>HEXU · CAMPUS DINING</p><h1>禾序 <span>智慧食堂运营中心</span></h1></div></div>
+      <div class="screen-brand"><span class="screen-brand-mark"><BrandLogo symbol badge /></span><div><p>FANDIAN · CAMPUS DINING</p><h1>饭点 <span>智慧食堂运营中心</span></h1></div></div>
       <div class="screen-header-right">
         <span class="screen-connection" :class="{ offline: error }"><i />{{ error ? '同步异常' : data ? '数据已同步' : '连接中' }}</span>
         <div class="screen-clock"><strong>{{ time }}</strong><small>{{ day }}</small></div>

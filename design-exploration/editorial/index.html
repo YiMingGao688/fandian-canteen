@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>禾序 · 管理端设计复核</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#232521;color:#f4f1e8;font:15px/1.65 'Segoe UI','Microsoft YaHei',sans-serif}
+main{width:min(1540px,100%);margin:auto;padding:32px clamp(18px,4vw,64px) 50px}
+h1,h2,p{margin:0}
+h1{font:400 clamp(30px,4vw,48px)/1.3 Georgia,'SimSun',serif;margin-bottom:12px}
+h2{font-size:21px;font-weight:500}
+a{color:#bde2c9;text-underline-offset:4px}
+header{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #606455;padding-bottom:24px;margin-bottom:26px}
+header p,.note{color:#c0c3b6}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
+button{font:inherit;color:#f4f1e8;border:1px solid #73776b;padding:7px 13px;border-radius:3px;background:none;cursor:pointer}
+button[aria-pressed=true]{background:#eae4d2;color:#222820}
+button:focus-visible,a:focus-visible{outline:2px solid #94cfae;outline-offset:4px}
+.images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+figure{margin:0;min-width:0}
+figcaption{display:flex;justify-content:space-between;gap:14px;margin-bottom:9px;font-weight:600}
+figcaption small{color:#c0c3b6;font-weight:400}
+figure img{display:block;width:100%;height:auto;border:1px solid #494c44;background:#20221f}
+figure a{display:block}
+.notes{margin-top:32px;border-top:1px solid #606455;padding-top:22px;display:grid;grid-template-columns:1.4fr 1fr;gap:30px}
+ul{padding-left:20px}
+.notes a{display:inline-block;margin:5px 15px 0 0}
+@media(max-width:800px){header,.notes{display:block}.images{grid-template-columns:1fr}header>a{display:inline-block;margin-top:12px}.notes>div{margin-bottom:20px}}
+</style>
+</head>
+<body><main>
+<header><div><h1>经营日报与窗口接单台</h1><p>经营总览与预约订单的页面结构、排版和交互复核</p></div><a href="http://127.0.0.1:15173/#/admin" target="_blank" rel="noopener">打开管理后台 ↗</a></header>
+<p class="note" id="context">左侧为改造前截图，右侧为新设计的同组样本。样本仅用于浏览器视觉验收。</p>
+<nav aria-label="截图类型">
+<button data-view="overview" aria-pressed="true">总览前后对比</button><button data-view="orders" aria-pressed="false">订单前后对比</button>
+<button data-view="live" aria-pressed="false">当前真实数据</button><button data-view="mobile" aria-pressed="false">手机布局</button>
+</nav>
+<div class="images" id="images"></div>
+<div class="notes"><div><h2>设计审查</h2><ul>
+<li>营收、出餐和菜品三种信息采用不同组件形态，按阅读顺序展开。</li>
+<li>顶部使用一组业务导航，标题工具与业务操作按上下文出现。</li>
+<li>食物照片、暖纸色核销单、中文展示字和数字比例建立校园餐饮特征。</li>
+<li>订单以时段为第一列，接单、备妥和核销使用不同操作形态。</li>
+<li>手机取餐时段分行显示，队列行保留备注、学生、金额和状态操作。</li>
+</ul></div><div><h2>验证记录</h2><p>构建与浏览器检查结果见记录文件。真实会话验证登录、读取与退出，订单写入流程使用隔离样本。</p><a href="verification.json">浏览器验证结果</a><a href="design-system.md">字体与组件规范</a></div></div>
+</main>
+<script>
+const views = {
+ overview:{note:'左侧为改造前截图，右侧为新设计的同组样本。样本仅用于浏览器视觉验收。',images:[['改造前 · 总览','../premium-dark/sample-desktop.png','1440px · 样本'],['新设计 · 总览','overview.png','1440px · 样本']]},
+ orders:{note:'改造前采用两列大卡片，新设计采用按状态组织的窗口工作单。两侧均为视觉验收样本。',images:[['改造前 · 预约订单','../premium-dark/orders-desktop.png','1440px · 样本'],['新设计 · 预约订单','orders.png','1440px · 样本']]},
+ live:{note:'这两张截图读取当前本地服务的真实数据，刷新管理后台可查看后续变化。',images:[['经营概览','live-overview.png','1440px · 真实接口'],['预约订单','live-orders.png','1440px · 真实接口']]},
+ mobile:{note:'390px宽度截图。核销区压缩为输入工具，订单时段、菜品、备注和操作保持可读。',images:[['经营概览','overview-mobile.png','390px · 样本'],['预约订单','orders-mobile.png','390px · 样本']]}
+}
+function show(view){
+ document.getElementById('context').textContent=views[view].note
+ document.querySelectorAll('[data-view]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.view===view)))
+ document.getElementById('images').replaceChildren(...views[view].images.map(([title,src,size])=>{
+  const figure=document.createElement('figure'),caption=document.createElement('figcaption'),small=document.createElement('small'),link=document.createElement('a'),img=document.createElement('img')
+  caption.textContent=title;small.textContent=size;caption.append(small);img.src=src;img.alt=title+'截图'
+  link.href=src;link.target='_blank';link.rel='noopener';link.append(img);figure.append(caption,link);return figure
+ }))
+}
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.view)))
+show('overview')
+</script>
+</body></html>

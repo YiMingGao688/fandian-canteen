@@ -1,0 +1,82 @@
+{
+  "at": "2026-11-05T06:55:22.904Z",
+  "scope": "Unified admin theme and readable typography",
+  "checks": [
+    "未登录访问仍进入原有登录页",
+    "真实管理体验账号进入新总览，接口和权限校验继续工作",
+    "使用ECharts真实渲染，主指标保持核销口径",
+    "队列卡联动预约状态筛选",
+    "快捷键和姓名搜索可用",
+    "订单详情可打开，Escape关闭并恢复焦点",
+    "已完成筛选来自已载入的真实状态字段",
+    "取餐节奏图标明数据范围并可切回收入",
+    "导出仅包含当前已载入经营指标",
+    "刷新复用既有读取接口，不发起写入",
+    "专注视图可进入和退出，不改变数据",
+    "菜品详情关联既有库存，原有模块沿用统一深色外壳",
+    "工具栏前往原有待接单模块，原订单处理控件保留",
+    "浮层与数据区域分离，图像资源正常",
+    "四个模块共享主题并显示中文菜单",
+    "主内容、按钮与导航字号提高",
+    "编辑与回复弹层统一深色、可输入关闭",
+    "三张业务页面小屏没有横向溢出",
+    "小屏详情可关闭，表格仅在自身区域滚动",
+    "零数据使用明确空态，不显示虚假曲线或NaN",
+    "大金额小屏排版无溢出",
+    "真实刷新和退出仍沿原会话流程"
+  ],
+  "errors": [],
+  "writes": [],
+  "consoleErrors": [],
+  "layouts": [
+    {
+      "width": 1024,
+      "scroll": 1024
+    },
+    {
+      "width": 390,
+      "scroll": 390
+    }
+  ],
+  "changedExistingSources": [
+    "web/src/pages/Workbench.vue"
+  ],
+  "backendUnchanged": true,
+  "authAndRoutesUnchanged": true,
+  "businessHandlers": [
+    {
+      "name": "load",
+      "unchanged": true
+    },
+    {
+      "name": "syncOrders",
+      "unchanged": true
+    },
+    {
+      "name": "advance",
+      "unchanged": true
+    },
+    {
+      "name": "pickup",
+      "unchanged": true
+    },
+    {
+      "name": "toggle",
+      "unchanged": true
+    },
+    {
+      "name": "saveDish",
+      "unchanged": true
+    },
+    {
+      "name": "sendReply",
+      "unchanged": true
+    }
+  ],
+  "unificationChangedSources": [
+    "web/src/premium-dashboard.css",
+    "web/src/components/PremiumChart.vue",
+    "web/src/pages/Workbench.vue"
+  ],
+  "pass": true
+}

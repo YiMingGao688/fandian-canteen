@@ -1,0 +1,38 @@
+{
+  "at": "2026-11-05T07:14:55.415Z",
+  "scope": "经营日报与窗口接单台 · 浏览器验收",
+  "checks": [
+    "真实登录与管理员权限",
+    "总览营收、均价与榜首均可追溯",
+    "ECharts 切换时段、加载真实画布",
+    "查找预约、详情、专注、导出",
+    "总览状态直接进入对应队列",
+    "订单搜索、备注、菜品明细与独立核销工具",
+    "隔离样本接单→备妥→凭码核销，校验失败允许重试",
+    "其余管理模块与表单仍可进入",
+    "1440、1024、768、390 和 360 像素布局，无整页横向溢出",
+    "空数据、大金额和刷新退出"
+  ],
+  "errors": [],
+  "writes": [],
+  "consoleErrors": [],
+  "mockWrites": [
+    {
+      "method": "POST",
+      "path": "/staff/orders/1000/accept"
+    },
+    {
+      "method": "POST",
+      "path": "/staff/orders/1000/ready"
+    },
+    {
+      "method": "POST",
+      "path": "/staff/pickup"
+    },
+    {
+      "method": "POST",
+      "path": "/staff/pickup"
+    }
+  ],
+  "pass": true
+}

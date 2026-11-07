@@ -1,0 +1,13 @@
+<view class="page tab-page home">
+  <view class="hero"><image src="/assets/images/hero.jpg" mode="aspectFill"/><view class="hero-copy"><view class="eyebrow">HELLO, GOOD MEAL</view><view class="title">下课了，好好吃顿饭。</view><view class="muted">提前预约 · 到窗取餐</view></view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view class="heading"><text>今天去哪吃？</text><text class="tiny">校园好味，等你来选</text></view>
+  <view class="windows"><view wx:for="{{windows}}" wx:key="id" class="window {{windowIndex === index ? 'selected' : ''}}" data-index="{{index}}" bindtap="selectWindow"><view class="tiny">{{item.canteenName}}</view><view class="window-name">{{item.name}}</view><view class="tiny">{{item.location}}</view></view></view>
+  <view class="note">{{selected.location}} · {{selected.enabled ? '开放预约' : '暂停预约'}}</view>
+  <view class="row search"><input placeholder="搜索今天想吃的" value="{{query}}" bindinput="search"/><button class="link" bindtap="favorites">{{favoritesOnly ? '♥ 已收藏' : '♡ 收藏'}}</button></view>
+  <scroll-view scroll-x class="chips"><view wx:for="{{categories}}" wx:key="id" class="chip {{categoryId == item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="category">{{item.name}}</view></scroll-view>
+  <view wx:if="{{loading && !menu.length}}" class="empty">正在准备菜单…</view>
+  <view wx:for="{{filtered}}" wx:key="id" class="food"><image src="{{item.image}}" mode="aspectFill"/><view class="food-info"><view class="row between"><text class="food-name">{{item.name}}</text><text data-id="{{item.id}}" data-liked="{{item.liked}}" bindtap="favorite">{{item.liked ? '♥' : '♡'}}</text></view><view class="tiny">{{item.tags}}</view><view class="tiny">余 {{item.stock}} 份 · 约 {{item.calories}} kcal</view><view class="row between"><text class="price">¥{{item.priceText}}</text><view class="row quantity"><button wx:if="{{item.count}}" disabled="{{busy}}" data-id="{{item.id}}" data-delta="-1" bindtap="change">−</button><text wx:if="{{item.count}}">{{item.count}}</text><button disabled="{{busy || item.stock <= item.count}}" data-id="{{item.id}}" data-delta="1" bindtap="change">＋</button></view></view></view></view>
+  <view wx:if="{{!filtered.length && !loading}}" class="empty">没有符合条件的菜品</view><view class="note">图片及营养数值为演示示意 · 按需点餐</view>
+</view>
+<view class="cart"><view><view>餐盘 · {{count}} 份　¥{{total}}</view><text class="cart-note" bindtap="clear">清空餐盘</text></view><button class="soft" bindtap="checkout">去预约 →</button></view>

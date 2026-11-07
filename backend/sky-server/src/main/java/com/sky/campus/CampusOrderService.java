@@ -109,6 +109,7 @@ public class CampusOrderService {
         LocalDate today = LocalDate.now(CampusCatalogService.ZONE);
         require(!slot.getServiceDate().isBefore(today) && !slot.getServiceDate().isAfter(today.plusDays(1)) && start.isAfter(now().plusMinutes(5)), "预约时段已经截止，请重新选择");
         Window window = catalog.openWindow(slot.getWindowId());
+        require(catalog.withinHours(window,slot),"这个时段已不在当前营业时间内，请重新选择");
         List<ShoppingCart> selected = cart.showShoppingCart();
         require(!selected.isEmpty(), "餐盘还是空的，先选几道菜吧");
         require(selected.stream().mapToInt(ShoppingCart::getNumber).sum() <= 20, "一份预约最多选择 20 份菜品");
@@ -256,7 +257,8 @@ public class CampusOrderService {
         require(target != null && order.getWindowId().equals(target.getWindowId()), "只能选择原取餐窗口的时段");
         LocalDateTime start = LocalDateTime.of(target.getServiceDate(), LocalTime.parse(target.getStartTime()));
         require(start.isAfter(now().plusMinutes(5)) && !target.getServiceDate().isAfter(LocalDate.now(CampusCatalogService.ZONE).plusDays(1)), "这个时段已经截止或尚未开放");
-        catalog.openWindow(target.getWindowId());
+        Window window=catalog.openWindow(target.getWindowId());
+        require(catalog.withinHours(window,target),"新时段已不在当前营业时间内，原预约保持不变");
         require(mapper.reserveSlot(slotId) == 1, "新时段已满，原预约保持不变");
         mapper.releaseSlot(order.getSlotId()); mapper.reschedule(id, slotId, start);
         return full(mapper.order(id));
@@ -270,6 +272,34 @@ public class CampusOrderService {
     public List<OrderView> list(boolean staff) {
         List<OrderView> result = mapper.orders(staff ? null : BaseContext.getCurrentId(), staff ? catalog.staffWindow() : null);
         result.forEach(this::full); return result;
+    }
+
+    /**
+     * 窗口人员或管理员拒单、取消授权范围内的预约，锁定订单串行校验状态并复用原退款渠道。
+     * 拒单只允许待接单；管理取消允许未支付至待取餐，已完成禁止取消。重复请求返回原取消结果，
+     * 不再次退款或归还库存、名额；支付宝沙箱退款失败时整个数据库事务回滚。
+     * @param id 需要处理的校园订单主键
+     * @param operation reject 拒绝接单，cancel 管理取消
+     * @param reason 操作原因，1 至 200 字
+     * @return 取消后的订单快照，包含取消原因和原支付渠道说明
+     * @throws com.sky.exception.BaseException 越权、状态不允许、原因不合规或退款失败
+     */
+    @Transactional
+    public OrderView terminate(Long id,String operation,String reason){
+        require(id!=null&&Set.of("reject","cancel").contains(operation==null?"":operation),"请选择正确的订单处理方式");
+        String explanation=CampusCatalogService.text(reason,200,"请填写 1 至 200 字的处理原因");
+        mapper.lockOrder(id);OrderView order=mapper.order(id);
+        require(order!=null&&catalog.managesWindow(order.getWindowId()),"预约不存在或不在当前管理范围");
+        if(order.getStatus()==Orders.CANCELLED)return full(order);
+        boolean rejection="reject".equals(operation);
+        require(rejection?order.getStatus()==2:order.getStatus()>=1&&order.getStatus()<=4,"当前状态不允许此操作，已完成预约不能取消");
+        require(order.getStatus()==1?order.getPayStatus()==Orders.UN_PAID:order.getPayStatus()==Orders.PAID,"订单支付状态不一致，请先刷新");
+        String note=(rejection?"窗口拒单：":"管理取消：")+explanation;
+        if(order.getPayStatus()==Orders.PAID&&Objects.equals(order.getPayMethod(),2))alipayGateway.refund(order.getNumber(),order.getAmount(),note);
+        cancelLocked(order,note);
+        if(rejection)orders.update(Orders.builder().id(id).rejectionReason(explanation).build());
+        log.info("校园管理处理订单，订单={}，操作人={}，类型={}",id,BaseContext.getCurrentId(),operation);
+        return full(mapper.order(id));
     }
 
     /**
@@ -332,7 +362,7 @@ public class CampusOrderService {
         mapper.releaseSlot(order.getSlotId());
         orders.update(Orders.builder().id(order.getId()).status(Orders.CANCELLED)
                 .payStatus(order.getPayStatus() == 1 ? Orders.REFUND : Orders.UN_PAID).cancelReason(reason).cancelTime(now()).build());
-        redis.delete(CampusCatalogService.MENU_KEY);
+        catalog.invalidateMenu();
     }
 
     /** 使用原明细 Mapper 补齐订单快照，不从前端接收菜价或已支付状态。 */

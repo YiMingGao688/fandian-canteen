@@ -10,6 +10,7 @@ web/node_modules/
 web/dist/
 web/.vite/
 artifacts/
+miniprogram/project.private.config.json
 
 # Python 临时文件与本机编辑器生成文件。
 **/__pycache__/

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "我的预约",
+  "backgroundColorTop": "#f8f7f1",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "pickup-time": "../../components/pickup-time/index"
+  }
+}

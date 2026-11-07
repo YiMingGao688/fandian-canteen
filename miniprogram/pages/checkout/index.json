@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "确认预约",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "pickup-time": "../../components/pickup-time/index"
+  }
+}

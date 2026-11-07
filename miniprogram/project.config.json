@@ -1,0 +1,40 @@
+{
+  "description": "禾序食堂学生端微信小程序",
+  "appid": "touristappid",
+  "projectname": "hexu-canteen",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "setting": {
+    "es6": true,
+    "minified": true,
+    "urlCheck": false,
+    "postcss": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "enhance": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": [{ "type": "folder", "value": "components/pickup-time" }]
+  },
+  "editorSetting": {},
+  "libVersion": "3.17.6"
+}

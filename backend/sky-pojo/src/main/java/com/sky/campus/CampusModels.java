@@ -1,6 +1,7 @@
 package com.sky.campus;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sky.entity.OrderDetail;
 import lombok.Data;
 import java.io.Serializable;
@@ -114,6 +115,8 @@ public final class CampusModels {
         /** 原订单支付渠道，服务端取消与退款规则使用，不向前端暴露。 */ @JsonIgnore private Integer payMethod;
         /** 订单创建时间。 */ private LocalDateTime orderTime;
         /** 原订单的取消说明。 */ private String cancelReason;
+        /** 窗口拒单时保存的原因，来自原 orders.rejection_reason。 */ private String rejectionReason;
+        /** 支付渠道说明，demo 表示本地演示，alipay 表示支付宝沙箱，用于取消时展示退款去向。 */ private String paymentChannel;
         /** 取餐窗口主键。 */ private Long windowId;
         /** 所属食堂名称。 */ private String canteenName;
         /** 取餐窗口名称。 */ private String windowName;
@@ -178,5 +181,39 @@ public final class CampusModels {
         /** 调整后的库存，不能小于零；不传时保留锁内最新库存。 */ private Integer stock;
         /** 上下架状态，只允许 0 或 1；不传时保持原状态。 */ private Integer status;
         /** 调整后的单价，必须大于零；不传时保持原价。 */ private BigDecimal price;
+    }
+
+    @Data
+    public static class DishSave {
+        /** 菜品名称，沿用原表全局唯一约束，最多 32 字。 */ private String name;
+        /** 启用中的菜品分类主键，不接受套餐分类。 */ @JsonDeserialize(using=CampusNumberDeserializer.LongValue.class) private Long categoryId;
+        /** 菜品归属窗口；窗口账号只允许自己的窗口，编辑时不能迁移归属。 */ @JsonDeserialize(using=CampusNumberDeserializer.LongValue.class) private Long windowId;
+        /** 以元为单位的单价，0.01 至 999，最多两位小数。 */ private BigDecimal price;
+        /** 当前剩余可售份数，0 至 10000；编辑时只提交实际修改的库存。 */ @JsonDeserialize(using=CampusNumberDeserializer.IntValue.class) private Integer stock;
+        /** 菜单图片，由校园图片上传接口返回；编辑时可保留原图。 */ private String image;
+        /** 菜品介绍，最多 255 字。 */ private String description;
+        /** 上下架状态，0 下架，1 在售；新增默认下架。 */ @JsonDeserialize(using=CampusNumberDeserializer.IntValue.class) private Integer status;
+        /** 每份能量估算，单位千卡，0 表示未填写。 */ @JsonDeserialize(using=CampusNumberDeserializer.IntValue.class) private Integer calories;
+        /** 逗号分隔的展示标签，最多 100 字。 */ private String tags;
+    }
+
+    @Data
+    public static class MenuCategory {
+        /** 原 category 表主键，仅查询 type=1 的菜品分类。 */ private Long id;
+        /** 分类名称，沿用原表全局唯一约束，最多 32 字。 */ private String name;
+        /** 展示排序，数值越小越靠前。 */ @JsonDeserialize(using=CampusNumberDeserializer.IntValue.class) private Integer sort;
+        /** 1 启用，0 停用；停用后不可用于新增或更换分类。 */ @JsonDeserialize(using=CampusNumberDeserializer.IntValue.class) private Integer status;
+        /** 当前分类被原 dish 表引用的菜品数量，用于删除保护。 */ private Long dishCount;
+    }
+
+    @Data
+    public static class MenuOptions {
+        /** 当前账号允许管理的窗口，窗口账号只返回绑定窗口。 */ private List<Window> windows;
+        /** 管理员可维护所有菜品分类，窗口账号仅取得启用分类。 */ private List<MenuCategory> categories;
+    }
+
+    @Data
+    public static class ImageUpload {
+        /** 上传成功后可供学生端、管理端共同访问的同源图片地址。 */ private String url;
     }
 }

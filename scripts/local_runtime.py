@@ -193,7 +193,7 @@ def main():
         raise RuntimeError('Build backend first: python scripts/build_backend.py')
     start('backend', 18088, [JAVA, '-Dfile.encoding=UTF-8', '-Duser.timezone=Asia/Shanghai', '-jar', jar, '--spring.config.additional-location=file:' + (LOCAL / 'application-local.yml').as_posix()])
     start('web', 15173, [NODE, ROOT / 'web/node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '15173', '--strictPort'], ROOT / 'web')
-    print('Student H5: http://127.0.0.1:15173/#/m\nAdministration: http://127.0.0.1:15173/#/admin\nOperations screen: http://127.0.0.1:15173/#/screen', flush=True)
+    print('Student mini program: import miniprogram/ in WeChat DevTools (API: http://127.0.0.1:15173/campus)\nAdministration: http://127.0.0.1:15173/#/admin\nOperations screen: http://127.0.0.1:15173/#/screen', flush=True)
 
 if __name__ == '__main__':
     main()

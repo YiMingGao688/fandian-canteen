@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +51,7 @@ public class CampusCatalogService {
     }
 
     /**
-     * 幂等生成指定窗口当天的早餐、午餐和晚餐时段，过滤距开始不足五分钟的时段。
+     * 按窗口当前营业区间幂等发布二十分钟时段，过滤距开始不足五分钟或已被新营业时间排除的时段。
      * 只开放今天与明天，既有时段的名额和已预约数不会被重新初始化。
      * @param windowId 预约窗口
      * @param date 就餐日期
@@ -61,16 +63,19 @@ public class CampusCatalogService {
         LocalDate today = LocalDate.now(ZONE);
         require(date != null && !date.isBefore(today) && !date.isAfter(today.plusDays(1)), "仅开放今天和明天的预约");
         Window window = openWindow(windowId);
-        for (String[] meal : new String[][]{{"07:00", "09:00"}, {"11:00", "13:20"}, {"17:00", "19:20"}}) {
-            for (LocalTime start = LocalTime.parse(meal[0]); start.isBefore(LocalTime.parse(meal[1])); start = start.plusMinutes(20)) {
+        for (LocalTime[] meal : CampusHours.ranges(window.getOpeningHours())) {
+            for (LocalTime start = meal[0]; !start.plusMinutes(20).isAfter(meal[1]) && start.plusMinutes(20).isAfter(start); start = start.plusMinutes(20)) {
                 Slot slot = new Slot(); slot.setWindowId(windowId); slot.setServiceDate(date);
                 slot.setStartTime(start.toString()); slot.setEndTime(start.plusMinutes(20).toString());
                 slot.setCapacity(window.getCapacity()); mapper.insertSlot(slot);
             }
         }
         LocalDateTime earliest = LocalDateTime.now(ZONE).plusMinutes(5);
-        return mapper.slots(windowId, date).stream().filter(s -> LocalDateTime.of(date, LocalTime.parse(s.getStartTime())).isAfter(earliest)).collect(Collectors.toList());
+        return mapper.slots(windowId, date).stream().filter(s -> LocalDateTime.of(date, LocalTime.parse(s.getStartTime())).isAfter(earliest) && withinHours(window,s)).collect(Collectors.toList());
     }
+
+    /** 新预约或改约校验当前营业区间，旧时段主键不能绕过已修改的营业时间。 */
+    boolean withinHours(Window window,Slot slot){return CampusHours.includes(window.getOpeningHours(),slot.getStartTime(),slot.getEndTime());}
 
     /**
      * 获取当前学生收藏的菜品主键，不读取其他学生的收藏。
@@ -164,7 +169,28 @@ public class CampusCatalogService {
         require(change.getStatus() != null && (change.getStatus() == 0 || change.getStatus() == 1), "请选择正确的上下架状态");
         require(change.getPrice() != null && change.getPrice().signum() > 0 && change.getPrice().scale() <= 2 && change.getPrice().doubleValue() <= 999, "价格应大于 0 且不超过 999 元，最多两位小数");
         mapper.changeDish(change, BaseContext.getCurrentId());
-        redis.delete(MENU_KEY); redis.delete("dish_" + dish.getCategoryId());
+        invalidateMenu(dish.getCategoryId());
+    }
+
+    /**
+     * 菜品或分类事务提交后清理校园及原分类菜单缓存，避免事务提交前被并发请求重新写入旧值。
+     * Redis 短时不可用时记录告警并由原有 30 秒 TTL 兜底，不将已成功提交的新增伪装成失败。
+     * @param categoryIds 发生变化的新旧分类，允许空值或重复值
+     */
+    void invalidateMenu(Long... categoryIds) {
+        Runnable invalidate = () -> {
+            try {
+                redis.delete(MENU_KEY);
+                Arrays.stream(categoryIds).filter(Objects::nonNull).distinct().forEach(id -> redis.delete("dish_" + id));
+            } catch (RuntimeException ex) {
+                org.slf4j.LoggerFactory.getLogger(CampusCatalogService.class).warn("菜品已提交，菜单缓存清理失败，等待缓存自然过期", ex);
+            }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { invalidate.run(); }
+            });
+        } else invalidate.run();
     }
 
     /**
