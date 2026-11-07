@@ -1,6 +1,7 @@
 package com.sky.task;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,8 @@ import java.util.Date;
  */
 @Component
 @Slf4j
+// 上游教学演示任务只写日志；校园运行默认关闭，避免每 5 秒产生一条无用 INFO 记录。
+@ConditionalOnProperty(name = "campus.legacy-jobs-enabled", havingValue = "true", matchIfMissing = true)
 public class MyTask {
 
     /**

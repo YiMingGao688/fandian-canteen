@@ -29,8 +29,8 @@ public class CampusController {
     @GetMapping("/me") public Result<Account> me() { return Result.success(auth.current()); }
     /** 食堂、窗口和实际营业状态。 */
     @GetMapping("/public/windows") public Result<List<Window>> windows() { return Result.success(catalog.windows()); }
-    /** 公共菜谱，窗口条件只影响展示，不影响用户权限。 */
-    @GetMapping("/public/menu") public Result<List<DishView>> menu(@RequestParam(required=false) Long windowId) { return Result.success(catalog.menu(windowId)); }
+    /** 公共菜谱只返回在售菜品，窗口条件只影响展示，不影响用户权限。 */
+    @GetMapping("/public/menu") public Result<List<DishView>> menu(@RequestParam(required=false) Long windowId) { return Result.success(catalog.publicMenu(windowId)); }
     /** 未来两天的可预约时段，使用上海日期。 */
     @GetMapping("/public/slots") public Result<List<Slot>> slots(@RequestParam Long windowId, @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate date) { return Result.success(catalog.slots(windowId, date)); }
     /** 校园公告列表。 */

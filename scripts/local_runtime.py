@@ -191,7 +191,11 @@ def main():
     jar = ROOT / 'backend/sky-server/target/sky-server-1.0-SNAPSHOT.jar'
     if not jar.exists():
         raise RuntimeError('Build backend first: python scripts/build_backend.py')
-    start('backend', 18088, [JAVA, '-Dfile.encoding=UTF-8', '-Duser.timezone=Asia/Shanghai', '-jar', jar, '--spring.config.additional-location=file:' + (LOCAL / 'application-local.yml').as_posix()])
+    # 显式指定端口：宿主的 SERVER_PORT / SERVER__PORT 会被 Spring Boot 宽松绑定解析为 server.port，
+    # 覆盖配置文件并让启动脚本检测的端口与实际监听端口不一致。命令行参数优先级更高。
+    start('backend', 18088, [JAVA, '-Dfile.encoding=UTF-8', '-Duser.timezone=Asia/Shanghai', '-jar', jar,
+                             '--spring.config.additional-location=file:' + (LOCAL / 'application-local.yml').as_posix(),
+                             '--server.port=18088'])
     start('web', 15173, [NODE, ROOT / 'web/node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '15173', '--strictPort'], ROOT / 'web')
     print('Student mini program: import miniprogram/ in WeChat DevTools (API: http://127.0.0.1:15173/campus)\nAdministration: http://127.0.0.1:15173/#/admin\nOperations screen: http://127.0.0.1:15173/#/screen', flush=True)
 

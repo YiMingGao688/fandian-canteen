@@ -289,7 +289,7 @@ class CampusOperationsIntegrationTest {
         @Bean CampusOperationsService operations(CampusMapper mapper,CampusOperationsMapper operations,CampusAuthService auth,CampusCatalogService catalog){return new CampusOperationsService(mapper,operations,auth,catalog);}
         @Bean CampusOrderQueryService queries(CampusOperationsMapper mapper,CampusCatalogService catalog){return new CampusOrderQueryService(mapper,catalog);}
         @Bean AlipayGatewayService gateway(){return mock(AlipayGatewayService.class);}
-        @Bean CampusOrderService orders(CampusMapper mapper,OrderMapper orders,OrderDetailMapper details,CampusAuthService auth,CampusCatalogService catalog,AlipayGatewayService gateway,RedisTemplate redis){return new CampusOrderService(mapper,orders,details,mock(ShoppingCartService.class),auth,catalog,gateway,redis,"demo");}
+        @Bean CampusOrderService orders(CampusMapper mapper,OrderMapper orders,OrderDetailMapper details,CampusAuthService auth,CampusCatalogService catalog,AlipayGatewayService gateway){return new CampusOrderService(mapper,orders,details,mock(ShoppingCartService.class),auth,catalog,gateway,"demo");}
         @Bean DishMapper dishMapper(SqlSessionTemplate session){return session.getMapper(DishMapper.class);}
         @Bean CampusImageService images(Properties settings){return new CampusImageService(settings.getProperty("images.path"));}
         @Bean CampusMenuService menu(CampusMapper mapper,DishMapper dishes,CampusCatalogService catalog,CampusImageService images,CampusAuthService auth){return new CampusMenuService(mapper,dishes,catalog,images,auth);}

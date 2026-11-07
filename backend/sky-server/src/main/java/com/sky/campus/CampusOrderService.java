@@ -13,8 +13,6 @@ import com.sky.service.ShoppingCartService;
 import com.sky.service.AlipayGatewayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -35,17 +33,16 @@ public class CampusOrderService {
     private final CampusAuthService auth;
     private final CampusCatalogService catalog;
     private final AlipayGatewayService alipayGateway;
-    private final RedisTemplate redis;
     private final String paymentMode;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public CampusOrderService(CampusMapper mapper, OrderMapper orders, OrderDetailMapper details,
             ShoppingCartService cart, CampusAuthService auth, CampusCatalogService catalog,
-            AlipayGatewayService alipayGateway, @Qualifier("redisTemplate") RedisTemplate redis,
+            AlipayGatewayService alipayGateway,
             @Value("${campus.payment-mode:demo}") String paymentMode) {
         this.mapper = mapper; this.orders = orders; this.details = details; this.cart = cart;
         this.auth = auth; this.catalog = catalog; this.alipayGateway = alipayGateway;
-        this.redis = redis; this.paymentMode = paymentMode;
+        this.paymentMode = paymentMode;
     }
 
     /**
@@ -135,7 +132,9 @@ public class CampusOrderService {
         details.insertBatch(lines);
         OrderRecord record = new OrderRecord(); record.setOrderId(order.getId()); record.setUserId(user);
         record.setWindowId(slot.getWindowId()); record.setSlotId(slot.getId()); record.setRequestId(request.getRequestId()); record.setDemo(false);
-        mapper.insertOrder(record); cart.cleanShoppingCart(); redis.delete(CampusCatalogService.MENU_KEY);
+        mapper.insertOrder(record); cart.cleanShoppingCart();
+        // 事务提交后再清缓存，避免并发读在提交前把旧库存重新写回。
+        catalog.invalidateMenu();
         return full(mapper.order(order.getId()));
     }
 
@@ -333,7 +332,8 @@ public class CampusOrderService {
         mapper.lockOrder(id); OrderView order = mapper.order(id);
         require(order.getStatus() == 4 && order.getPayStatus() == 1, "预约尚未备好或已经核销，请勿重复取餐");
         orders.update(Orders.builder().id(id).status(Orders.COMPLETED).deliveryTime(now()).build());
-        mapper.markPickedUp(id); redis.delete(CampusCatalogService.MENU_KEY);
+        mapper.markPickedUp(id);
+        catalog.invalidateMenu();
         return full(mapper.order(id));
     }
 
