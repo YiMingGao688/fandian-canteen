@@ -20,7 +20,7 @@ const groups = [
 ]
 const filters = [{ id: 'active', name: '进行中' }, ...groups.slice(0,3).map(g => ({id:String(g.id),name:g.name})), {id:'1',name:'待支付'}, {id:'5',name:'已完成'}, {id:'6',name:'已取消'}, {id:'all',name:'全部'}]
 const dateLabel = computed(() => new Intl.DateTimeFormat('zh-CN', {timeZone:'Asia/Shanghai', month:'long', day:'numeric', weekday:'long'}).format(clock.value))
-let interval,refreshTimer,searchTimer,controller,requestNumber=0
+let interval,refreshTimer,searchTimer,controller,requestNumber=0,lastRemoteLoad=0
 onMounted(() => { interval = setInterval(() => { clock.value = Date.now() }, 15000);if(props.serverMode)refreshTimer=setInterval(()=>{if(!document.hidden&&!serverLoading.value&&!props.busy&&!terminating.value)loadRemote()},5000) })
 onUnmounted(() => {clearInterval(interval);clearInterval(refreshTimer);clearTimeout(searchTimer);controller?.abort();requestNumber++})
 
@@ -54,6 +54,7 @@ watch(keyword,value=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{sear
 async function loadRemote(){
   if(!props.serverMode)return
   if(fromDate.value&&toDate.value&&toDate.value<fromDate.value){serverError.value='结束日期不能早于开始日期';return}
+  lastRemoteLoad=Date.now()
   controller?.abort();controller=new AbortController();const number=++requestNumber,requestedPage=page.value
   serverLoading.value=true;serverError.value=''
   try{
@@ -65,7 +66,8 @@ async function loadRemote(){
   finally{if(number===requestNumber)serverLoading.value=false}
 }
 watch([page,pageSize,filter,searchTerm,fromDate,toDate,windowFilter],loadRemote,{immediate:true})
-watch(()=>props.orders,()=>{if(!props.busy)loadRemote()})
+// 父组件每 20 秒的全量加载也会替换 orders 引用；与 5 秒轮询相邻时跳过重复请求。
+watch(()=>props.orders,()=>{if(!props.busy&&Date.now()-lastRemoteLoad>2000)loadRemote()})
 watch(()=>props.busy,(value,previous)=>{if(previous&&!value)loadRemote()})
 
 /** 核销凭证仍须由到窗学生提供；从订单跳转仅聚焦输入框，绝不预填取餐码。 */

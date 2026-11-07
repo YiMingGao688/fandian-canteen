@@ -33,7 +33,9 @@ logging:
     com.sky.mapper: info
 campus:
   payment-mode: demo
+  # 上游教学演示任务与微信支付回调不属于校园业务；默认关闭，避免遗留端点和无效调度。
   legacy-jobs-enabled: false
+  legacy-wechat-notify-enabled: false
   alipay:
     app-id: ''
     private-key: ''

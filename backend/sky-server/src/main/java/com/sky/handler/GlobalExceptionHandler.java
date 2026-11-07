@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -24,6 +27,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
     public Result<Void> oversizedUpload(MaxUploadSizeExceededException ex) {
         return Result.error("图片过大，请在页面中重新选择并压缩上传");
+    }
+
+    /**
+     * 控制器本地未声明处理器的日期、页码、路径参数及请求体格式错误，统一回到项目 Result 协议。
+     * 例如 /public/slots 的非法日期与 /staff/reports 的非法窗口编号。
+     */
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, BindException.class, HttpMessageNotReadableException.class})
+    public Result<Void> invalidRequest(Exception ex) {
+        return Result.error("输入格式不正确，请检查日期、页码及整数字段");
     }
 
     /**

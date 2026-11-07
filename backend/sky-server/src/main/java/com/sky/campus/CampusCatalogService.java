@@ -51,6 +51,16 @@ public class CampusCatalogService {
     }
 
     /**
+     * 公开菜谱只返回在售菜品，不向未登录访问者暴露已下架菜品的价格与展示资料。
+     * 管理端仍通过 menu() 读取全部菜品，以便维护下架记录和历史订单引用。
+     * @param windowId 可选的窗口主键
+     * @return 当前在售的菜谱列表
+     */
+    public List<DishView> publicMenu(Long windowId) {
+        return menu(windowId).stream().filter(d -> Integer.valueOf(1).equals(d.getStatus())).collect(Collectors.toList());
+    }
+
+    /**
      * 按窗口当前营业区间幂等发布二十分钟时段，过滤距开始不足五分钟或已被新营业时间排除的时段。
      * 只开放今天与明天，既有时段的名额和已预约数不会被重新初始化。
      * @param windowId 预约窗口
@@ -63,8 +73,11 @@ public class CampusCatalogService {
         LocalDate today = LocalDate.now(ZONE);
         require(date != null && !date.isBefore(today) && !date.isAfter(today.plusDays(1)), "仅开放今天和明天的预约");
         Window window = openWindow(windowId);
+        // 先读取已发布时段，重复浏览只对缺失时段写入；并发发布仍由唯一键和 insert ignore 兜底。
+        Set<String> published = mapper.slots(windowId, date).stream().map(Slot::getStartTime).collect(Collectors.toSet());
         for (LocalTime[] meal : CampusHours.ranges(window.getOpeningHours())) {
             for (LocalTime start = meal[0]; !start.plusMinutes(20).isAfter(meal[1]) && start.plusMinutes(20).isAfter(start); start = start.plusMinutes(20)) {
+                if (!published.add(start.toString())) continue;
                 Slot slot = new Slot(); slot.setWindowId(windowId); slot.setServiceDate(date);
                 slot.setStartTime(start.toString()); slot.setEndTime(start.plusMinutes(20).toString());
                 slot.setCapacity(window.getCapacity()); mapper.insertSlot(slot);
@@ -110,7 +123,8 @@ public class CampusCatalogService {
         require(!Boolean.TRUE.equals(order.getReviewed()), "这份订单已经评价过了");
         require(review.getRating() != null && review.getRating() >= 1 && review.getRating() <= 5, "评分需为 1 至 5 星");
         review.setContent(text(review.getContent(), 300, "请填写 1 至 300 字的评价"));
-        mapper.insertReview(BaseContext.getCurrentId(), review); redis.delete(MENU_KEY);
+        mapper.insertReview(BaseContext.getCurrentId(), review);
+        invalidateMenu();
     }
 
     /**

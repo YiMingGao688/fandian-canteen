@@ -12,12 +12,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /** 校园学号注册登录；复用 user 主键及 JWT，不依赖微信账号和第三方密钥。 */
 @Service
 public class CampusAuthService {
     private final CampusMapper mapper;
     private final String secret;
+
+    /** 在线口令尝试限速：同一账号 60 秒内连续失败 5 次后短暂拒绝，成功即清零。 */
+    private static final int MAX_FAILURES = 5;
+    private static final long FAILURE_WINDOW_MILLIS = 60_000L;
+    private static final int MAX_TRACKED_ACCOUNTS = 4096;
+    private final ConcurrentMap<String, Failures> failedLogins = new ConcurrentHashMap<>();
+
+    /** 仅记录真实账号的失败次数，随机用户名不会占用内存；不持久锁定账号，重启或窗口到期即恢复。 */
+    private static final class Failures {
+        private final long windowStart;
+        private volatile int count;
+        private Failures(long windowStart) { this.windowStart = windowStart; }
+    }
 
     public CampusAuthService(CampusMapper mapper, @Value("${campus.jwt-secret}") String secret) {
         this.mapper = mapper;
@@ -49,15 +64,43 @@ public class CampusAuthService {
 
     /**
      * 校验学号或工作账号的密码摘要并签发两小时 JWT；错误消息不暴露账号是否存在。
+     * 对真实账号连续失败的口令尝试做短时限速，降低在线撞库可行性；限速状态仅在内存中。
      * @param request 登录账号和本次输入的密码
      * @return JWT 与数据库决定的角色资料
-     * @throws BaseException 密码错误、账号不存在或账号已停用
+     * @throws BaseException 密码错误、账号不存在、账号已停用或短时间内失败次数过多
      */
     public LoginResult login(LoginRequest request) {
         validateCredentials(request);
-        Account account = mapper.account(request.getUsername());
-        if (account == null || !Integer.valueOf(1).equals(account.getEnabled()) || !CampusPassword.matches(request.getPassword(), account.getPasswordHash())) throw new BaseException("账号或密码不正确");
+        String username = request.getUsername();
+        checkLoginThrottle(username);
+        Account account = mapper.account(username);
+        if (account == null || !Integer.valueOf(1).equals(account.getEnabled()) || !CampusPassword.matches(request.getPassword(), account.getPasswordHash())) {
+            recordLoginFailure(username, account != null);
+            throw new BaseException("账号或密码不正确");
+        }
+        failedLogins.remove(username);
         return issue(account);
+    }
+
+    /** 超出失败次数且仍在时间窗内时拒绝本次尝试；窗口到期先清空再放行。 */
+    private void checkLoginThrottle(String username) {
+        Failures state = failedLogins.get(username);
+        if (state == null) return;
+        long now = System.currentTimeMillis();
+        if (now - state.windowStart >= FAILURE_WINDOW_MILLIS) { failedLogins.remove(username); return; }
+        if (state.count >= MAX_FAILURES) throw new BaseException("登录尝试过于频繁，请稍后再试");
+    }
+
+    /** 只为数据库中存在的账号累计失败，避免未知用户名撑大计数器；同一账号的更新在 compute 内串行。 */
+    private void recordLoginFailure(String username, boolean accountExists) {
+        if (!accountExists) return;
+        long now = System.currentTimeMillis();
+        if (failedLogins.size() >= MAX_TRACKED_ACCOUNTS) failedLogins.clear();
+        failedLogins.compute(username, (key, value) -> {
+            Failures current = value == null || now - value.windowStart >= FAILURE_WINDOW_MILLIS ? new Failures(now) : value;
+            current.count++;
+            return current;
+        });
     }
 
     /**

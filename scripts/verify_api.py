@@ -63,6 +63,8 @@ def main():
     admin = ok('/auth/login', 'POST', {'username': 'canteen_admin', 'password': 'Campus@2026'})['token']
     screen = ok('/auth/login', 'POST', {'username': 'canteen_screen', 'password': 'Campus@2026'})['token']
     tomorrow = (datetime.now(timezone(timedelta(hours=8))) + timedelta(days=1)).date().isoformat()
+    # 全新初始化的数据库只带历史演示时段，先发布目标日期的时段，再检查大屏名额汇总。
+    ok(f'/public/slots?windowId=1&date={tomorrow}')
     screen_data = ok(f'/screen/overview?date={tomorrow}', token=screen)
     def keys_in(value):
         if isinstance(value, dict):

@@ -30,7 +30,10 @@ Page({
     const categories = [{ id: 'all', name: '全部' }]
     rows.forEach(d => { if (!categories.some(c => String(c.id) === String(d.categoryId))) categories.push({ id: d.categoryId, name: d.categoryName }) })
     const filtered = rows.filter(d => Number(d.status) === 1 && (this.data.categoryId === 'all' || String(d.categoryId) === String(this.data.categoryId)) && (!this.data.favoritesOnly || this.data.favorites.some(id => String(id) === String(d.id))) && `${d.name}${d.tags || ''}${d.description || ''}`.includes(this.data.query.trim())).map(d => ({ ...d, count: (this.data.cart.find(c => String(c.dishId) === String(d.id)) || {}).number || 0, liked: this.data.favorites.some(id => String(id) === String(d.id)) }))
-    this.setData({ selected, categories, filtered, count: this.data.cart.reduce((n, c) => n + c.number, 0), total: u.money(this.data.cart.reduce((n, c) => n + c.number * c.amount, 0)) })
+    // 合计按公开菜单当前单价计算，避免管理员改价后仍显示加购时的旧价格快照。
+    const prices = new Map(this.data.menu.map(d => [String(d.id), Number(d.price)]))
+    const total = this.data.cart.reduce((n, c) => n + Number(c.number) * (prices.has(String(c.dishId)) ? prices.get(String(c.dishId)) : Number(c.amount)), 0)
+    this.setData({ selected, categories, filtered, count: this.data.cart.reduce((n, c) => n + c.number, 0), total: u.money(total) })
   },
   selectWindow(e) { this.setData({ windowIndex: Number(e.currentTarget.dataset.index), categoryId: 'all' }); this.apply() },
   search(e) { this.setData({ query: e.detail.value }); this.apply() },

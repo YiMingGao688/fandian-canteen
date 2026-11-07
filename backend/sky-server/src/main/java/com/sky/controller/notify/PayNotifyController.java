@@ -9,6 +9,7 @@ import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +25,8 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/notify")
 @Slf4j
+// 校园支付只走 /campus 的学生接口与 /notify/alipay 的验签回调；未配置的微信遗留回调不对外注册。
+@ConditionalOnProperty(name = "campus.legacy-wechat-notify-enabled", havingValue = "true", matchIfMissing = true)
 public class PayNotifyController {
 
     @Autowired

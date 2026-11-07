@@ -8,11 +8,17 @@ Page({
     if (!u.ensureStudent()) return
     await u.run(this, async () => {
       const [cart, menu, windows] = await Promise.all([u.api('/student/cart'), u.api('/public/menu'), u.api('/public/windows')])
-      if (!cart.length) { this.setData({ cart: [] }); return }
-      const dish = menu.find(d => String(d.id) === String(cart[0].dishId))
-      if (!dish) throw new Error('餐盘中的菜品已失效，请返回点餐页')
-      this.windowId = dish.windowId
-      this.setData({ cart: cart.map(c => ({ ...c, image: u.image(c.image) })), window: windows.find(w => String(w.id) === String(dish.windowId)), total: u.money(cart.reduce((n, c) => n + c.number * c.amount, 0)) })
+      if (!cart.length) { this.setData({ cart: [], total: '0.00', window: null }); this.windowId = null; return }
+      // 逐项核对餐盘：公开菜单只含在售菜品，任一菜品下架或失效都不能进入结算。
+      const dishes = new Map(menu.map(d => [String(d.id), d]))
+      const unusable = () => this.setData({ cart: [], total: '0.00', window: null, slots: [], slotIndex: -1, loadingSlots: false })
+      if (cart.some(c => !dishes.has(String(c.dishId)))) { unusable(); throw new Error('餐盘中有已下架或失效的菜品，请返回点餐页清空后重选') }
+      const first = dishes.get(String(cart[0].dishId))
+      if (cart.some(c => String(dishes.get(String(c.dishId)).windowId) !== String(first.windowId))) { unusable(); throw new Error('一份预约只能选择同一窗口，请返回点餐页清空餐盘') }
+      this.windowId = first.windowId
+      // 金额以服务端菜单当前价格计算，与下单事务重新计价的口径一致。
+      const total = cart.reduce((sum, c) => sum + Number(c.number) * Number(dishes.get(String(c.dishId)).price), 0)
+      this.setData({ cart: cart.map(c => ({ ...c, image: u.image(c.image) })), window: windows.find(w => String(w.id) === String(first.windowId)), total: u.money(total) })
       await this.loadSlots()
     })
   },
