@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -106,11 +108,13 @@ public class CampusAuthService {
         if (state.count >= MAX_FAILURES) throw new BaseException(LOGIN_THROTTLED);
     }
 
-    /** 所有失败都计数；规模较大时只惰性清理过期键，达到上限也绝不清空未过期的限速状态。 */
+    /** 所有失败都计数；表满时腾出空间而不是放弃，真实账号的限速状态不会被刷表绕过。 */
     private void recordLoginFailure(String key) {
         long now = System.currentTimeMillis();
         if (failedLogins.size() >= MAX_TRACKED_KEYS / 2) evictExpired(now);
-        if (failedLogins.size() >= MAX_TRACKED_KEYS) return;
+        boolean tracked = failedLogins.containsKey(key);
+        if (!tracked && failedLogins.size() >= MAX_TRACKED_KEYS) makeRoom(key);
+        if (!tracked && failedLogins.size() >= MAX_TRACKED_KEYS) return;
         failedLogins.compute(key, (ignored, value) -> {
             Failures current = value == null || now - value.windowStart >= FAILURE_WINDOW_MILLIS ? new Failures(now) : value;
             current.count++;
@@ -121,6 +125,25 @@ public class CampusAuthService {
     /** 只移除已超出时间窗的计数，保留仍在有效期内的限速状态。 */
     private void evictExpired(long now) {
         failedLogins.entrySet().removeIf(entry -> now - entry.getValue().windowStart >= FAILURE_WINDOW_MILLIS);
+    }
+
+    /**
+     * 为新的真实账号键腾出空间：未知账号键优先淘汰，仍不足时按窗口起点淘汰最旧的一批。
+     * 已存在的键永远不参与淘汰，因此任何账号的失败次数都能继续累加到限速阈值。
+     */
+    private void makeRoom(String key) {
+        for (String existing : failedLogins.keySet()) {
+            if (failedLogins.size() < MAX_TRACKED_KEYS) return;
+            if (existing.startsWith("n:")) failedLogins.remove(existing);
+        }
+        if (key.startsWith("n:") || failedLogins.size() < MAX_TRACKED_KEYS) return;
+        ArrayList<Map.Entry<String, Failures>> oldest = new ArrayList<>(failedLogins.entrySet());
+        oldest.sort(Comparator.comparingLong(entry -> entry.getValue().windowStart));
+        int evict = Math.min(oldest.size(), MAX_TRACKED_KEYS / 16);
+        for (int i = 0; i < evict; i++) {
+            Map.Entry<String, Failures> entry = oldest.get(i);
+            failedLogins.remove(entry.getKey(), entry.getValue());
+        }
     }
 
     /**

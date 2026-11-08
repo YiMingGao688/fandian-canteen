@@ -85,6 +85,18 @@ public class CampusOrderService {
     public void clearCart() { mapper.lockUser(BaseContext.getCurrentId()); cart.cleanShoppingCart(); }
 
     /**
+     * 一次事务移除本人购物车中已下架或不再出现在公开菜谱中的菜品。
+     * 前端不再按份逐次请求，避免中途失败时后端已减一部分而页面仍显示旧数量。
+     * @return 实际移除的购物车行数
+     */
+    @Transactional
+    public int removeInvalidCart() {
+        Long user = BaseContext.getCurrentId();
+        mapper.lockUser(user);
+        return mapper.deleteInvalidCart(user);
+    }
+
+    /**
      * 幂等提交校园预约：锁定用户与时段，校验同一窗口、未来日期和可售库存，
      * 从数据库重新计算金额，原子扣库存与预约名额，写入原订单和明细后清空购物车。
      * 任一步骤失败时全部回滚；相同用户重复 requestId 返回原订单。

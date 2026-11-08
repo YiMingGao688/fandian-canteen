@@ -41,6 +41,8 @@ public class CampusController {
     @PostMapping("/student/cart") public Result<Void> cart(@RequestBody CartChange change) { orders.changeCart(change); return Result.success(); }
     /** 清空本人购物车。 */
     @DeleteMapping("/student/cart") public Result<Void> clearCart() { orders.clearCart(); return Result.success(); }
+    /** 一次移除餐盘中已下架或失效的菜品，避免逐份请求造成中途状态不一致。 */
+    @DeleteMapping("/student/cart/invalid") public Result<Integer> removeInvalidCart() { return Result.success(orders.removeInvalidCart()); }
     /** 根据购物车和时段创建幂等预约，金额由数据库菜价计算。 */
     @PostMapping("/student/orders") public Result<OrderView> submit(@RequestBody SubmitRequest request) { return Result.success(orders.submit(request)); }
     /** 本人最近预约和取餐记录。 */
