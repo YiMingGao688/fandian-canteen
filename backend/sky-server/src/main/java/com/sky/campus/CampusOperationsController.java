@@ -4,13 +4,10 @@ import com.sky.campus.CampusModels.*;
 import com.sky.campus.CampusOperationsModels.*;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import java.util.List;
 
-/** 运营设置、历史订单及异常处理入口，身份由校园拦截器校验，具体权限由 Service 再次限定。 */
+/** 运营设置与历史订单入口，身份由校园拦截器校验，具体权限由 Service 再次限定。 */
 @RestController
 @RequestMapping("/campus/staff")
 public class CampusOperationsController {
@@ -43,8 +40,4 @@ public class CampusOperationsController {
     @PostMapping("/orders/{id}/reject") public Result<OrderView> reject(@PathVariable Long id,@RequestBody OperationReason request){return Result.success(orders.terminate(id,"reject",request.getReason()));}
     /** 管理取消尚未核销预约，原因必填，重复请求不重复释放资源。 */
     @PostMapping("/orders/{id}/cancel") public Result<OrderView> cancel(@PathVariable Long id,@RequestBody OperationReason request){return Result.success(orders.terminate(id,"cancel",request.getReason()));}
-
-    /** 错误数字、日期或分页参数统一返回项目 Result，便于筛选和表单保留输入后修改。 */
-    @ExceptionHandler({HttpMessageNotReadableException.class,BindException.class,MethodArgumentTypeMismatchException.class})
-    public Result<Void> invalidInput(){return Result.error("输入格式不正确，请检查日期、页码及整数字段");}
 }
