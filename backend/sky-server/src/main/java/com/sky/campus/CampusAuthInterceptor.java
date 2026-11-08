@@ -10,8 +10,8 @@ import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /** 沿用项目 MVC 拦截方式；校园请求不创建 Shiro Session，并清理线程身份。 */
 @Component

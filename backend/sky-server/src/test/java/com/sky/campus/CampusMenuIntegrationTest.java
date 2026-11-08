@@ -63,7 +63,19 @@ class CampusMenuIntegrationTest {
         menu = context.getBean(CampusMenuService.class); catalog = context.getBean(CampusCatalogService.class);
         images = context.getBean(CampusImageService.class); auth = context.getBean(CampusAuthService.class);
         redis = context.getBean(RedisTemplate.class); db = new JdbcTemplate(context.getBean(DataSource.class));
-        mvc = MockMvcBuilders.standaloneSetup(context.getBean(CampusMenuController.class)).setControllerAdvice(new GlobalExceptionHandler()).build();
+        // Spring 7 的 standalone 默认转换器优先 Jackson 3，不识别 Jackson 2 注解注册的严格数值校验
+        // （CampusNumberDeserializer）；显式注入与应用 WebMvcConfiguration 一致的 Jackson 2 转换器，
+        // 保持“小数写入整数字段直接拒绝”的对外契约。findAndRegisterModules 对齐旧默认转换器的 jsr310 注册。
+        org.springframework.http.converter.json.MappingJackson2HttpMessageConverter appJson =
+                new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter();
+        appJson.setObjectMapper(json.findAndRegisterModules());
+        mvc = MockMvcBuilders.standaloneSetup(context.getBean(CampusMenuController.class))
+                // 保留默认转换器能力（图片 Resource、byte[]、String），仅把 Jackson 2 置于首位。
+                .setMessageConverters(appJson,
+                        new org.springframework.http.converter.ByteArrayHttpMessageConverter(),
+                        new org.springframework.http.converter.StringHttpMessageConverter(java.nio.charset.StandardCharsets.UTF_8),
+                        new org.springframework.http.converter.ResourceHttpMessageConverter())
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream(); ImageIO.write(new BufferedImage(40, 40, BufferedImage.TYPE_INT_RGB), "png", bytes);
         image = images.upload(new MockMultipartFile("file", "test.png", "image/png", bytes.toByteArray()));
     }
@@ -223,7 +235,7 @@ class CampusMenuIntegrationTest {
         static final AtomicBoolean failLink = new AtomicBoolean();
         @Bean Properties settings() throws IOException {
             Properties settings=new Properties(); try (InputStream input=Files.newInputStream(Path.of(System.getProperty("campus.test.config")))) { settings.load(input); }
-            if (!settings.getProperty("db.url","").matches("jdbc:mysql://127\\.0\\.0\\.1:13316/fandian_catalog_test_[a-z0-9_]+\\?.*")) throw new IllegalStateException("Refusing non-test database");
+            if (!settings.getProperty("db.url","").matches("jdbc:mysql://127\\.0\\.0\\.1:133(16|17)/fandian_catalog_test_[a-z0-9_]+\\?.*")) throw new IllegalStateException("Refusing non-test database");
             return settings;
         }
         @Bean DataSource dataSource(Properties settings) { return new DriverManagerDataSource(settings.getProperty("db.url"),settings.getProperty("db.username"),settings.getProperty("db.password")); }

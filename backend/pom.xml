@@ -6,7 +6,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>2.7.3</version>
+        <version>4.1.2</version>
     </parent>
     <groupId>com.sky</groupId>
     <artifactId>sky-take-out</artifactId>
@@ -18,17 +18,17 @@
         <module>sky-server</module>
     </modules>
     <properties>
-        <!-- 校园认证使用 Shiro 3，运行和编译统一使用本机 JDK 17。 -->
+        <!-- Spring Boot 4 要求 Java 17+；校园认证使用 Shiro 3。 -->
         <java.version>17</java.version>
-        <mybatis.spring>2.2.0</mybatis.spring>
+        <mybatis.spring>4.0.1</mybatis.spring>
         <lombok>1.18.36</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
-        <druid>1.2.1</druid>
-        <pagehelper>1.3.0</pagehelper>
+        <druid>1.2.28</druid>
+        <pagehelper>4.1.1</pagehelper>
+        <swagger.annotations>1.6.14</swagger.annotations>
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
-        <knife4j>3.0.2</knife4j>
-        <aspectj>1.9.4</aspectj>
+        <aspectj>1.9.24</aspectj>
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
@@ -59,9 +59,12 @@
                 <version>${commons.lang}</version>
             </dependency>
 
+            <!-- Druid 的 boot3 starter 引用 Boot 3 的 org.springframework.boot.autoconfigure.jdbc.DataSourceProperties，
+                 Boot 4 已将该类迁至 org.springframework.boot.jdbc.autoconfigure，自动配置类无法加载；
+                 因此只依赖 druid 核心，由 DruidDataSourceConfiguration 显式装配连接池。 -->
             <dependency>
                 <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
+                <artifactId>druid</artifactId>
                 <version>${druid}</version>
             </dependency>
 
@@ -71,10 +74,12 @@
                 <version>${pagehelper}</version>
             </dependency>
 
+            <!-- Springfox/Knife4j 2.x 依赖 javax 与 Spring 5 内部 API，无法在 Boot 4 运行；
+                 仅保留纯注解坐标以维持现有控制器源码编译，接口文档生成能力另行迁移。 -->
             <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-spring-boot-starter</artifactId>
-                <version>${knife4j}</version>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.annotations}</version>
             </dependency>
 
             <dependency>

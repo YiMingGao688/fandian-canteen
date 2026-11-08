@@ -162,8 +162,9 @@ def prepare_infrastructure():
       url: jdbc:mysql://127.0.0.1:13316/campus_ordering?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
       username: campus
       password: '{state['db_password']}'
-  redis:
-    password: '{state['redis_password']}'
+  data:
+    redis:
+      password: '{state['redis_password']}'
 campus:
   payment-mode: {json.dumps(payment_mode)}
   jwt-secret: '{state['jwt_secret']}'

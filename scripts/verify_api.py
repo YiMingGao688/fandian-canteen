@@ -6,11 +6,13 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 import json
+import os
 import secrets
 import time
 import uuid
 
-BASE = 'http://127.0.0.1:18088/campus'
+# 默认验证 18088；升级窗口期主端口被主仓库实例占用时，用 CAMPUS_VERIFY_BASE 指向本工作区备用端口实例。
+BASE = os.environ.get('CAMPUS_VERIFY_BASE', 'http://127.0.0.1:18088/campus')
 RESULTS = []
 
 def call(path, method='GET', data=None, token=None):

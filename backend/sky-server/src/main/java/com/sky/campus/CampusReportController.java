@@ -1,7 +1,7 @@
 package com.sky.campus;
 import com.sky.result.Result;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.io.IOException;
 /** 经营报表和批量菜品入口，沿用校园管理身份及窗口权限。 */
