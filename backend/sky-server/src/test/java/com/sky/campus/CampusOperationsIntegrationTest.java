@@ -66,7 +66,17 @@ class CampusOperationsIntegrationTest {
         context=new AnnotationConfigApplicationContext(Config.class);db=new JdbcTemplate(context.getBean(DataSource.class));
         operations=context.getBean(CampusOperationsService.class);queries=context.getBean(CampusOrderQueryService.class);orders=context.getBean(CampusOrderService.class);
         catalog=context.getBean(CampusCatalogService.class);auth=context.getBean(CampusAuthService.class);realm=context.getBean(CampusRealm.class);gateway=context.getBean(AlipayGatewayService.class);
-        mvc=MockMvcBuilders.standaloneSetup(context.getBean(CampusOperationsController.class)).addInterceptors(new CampusAuthInterceptor(realm)).setControllerAdvice(new GlobalExceptionHandler()).build();
+        // 同 CampusMenuIntegrationTest：显式 Jackson 2 转换器对齐应用真实链路（应用在转换器首位注入 Jackson 2）。
+        org.springframework.http.converter.json.MappingJackson2HttpMessageConverter appJson =
+                new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter();
+        appJson.setObjectMapper(json);
+        mvc=MockMvcBuilders.standaloneSetup(context.getBean(CampusOperationsController.class))
+                // 同 CampusMenuIntegrationTest：Jackson 2 居首位，并保留默认转换器能力。
+                .setMessageConverters(appJson,
+                        new org.springframework.http.converter.ByteArrayHttpMessageConverter(),
+                        new org.springframework.http.converter.StringHttpMessageConverter(java.nio.charset.StandardCharsets.UTF_8),
+                        new org.springframework.http.converter.ResourceHttpMessageConverter())
+                .addInterceptors(new CampusAuthInterceptor(realm)).setControllerAdvice(new GlobalExceptionHandler()).build();
         passwordHash=CampusPassword.hash("Initial@2026");
     }
     @AfterAll void close(){if(context!=null)context.close();BaseContext.removeCurrentId();}
@@ -269,7 +279,7 @@ class CampusOperationsIntegrationTest {
     @Configuration @EnableTransactionManagement @EnableAspectJAutoProxy
     static class Config {
         static final String SECRET="local-test-only-jwt-secret-for-operations-2026";
-        @Bean Properties settings() throws Exception{Properties settings=new Properties();try(InputStream input=Files.newInputStream(Path.of(System.getProperty("campus.test.config")))){settings.load(input);}if(!settings.getProperty("db.url","").matches("jdbc:mysql://127\\.0\\.0\\.1:13316/fandian_catalog_test_[a-z0-9_]+\\?.*"))throw new IllegalStateException("Refusing non-test database");return settings;}
+        @Bean Properties settings() throws Exception{Properties settings=new Properties();try(InputStream input=Files.newInputStream(Path.of(System.getProperty("campus.test.config")))){settings.load(input);}if(!settings.getProperty("db.url","").matches("jdbc:mysql://127\\.0\\.0\\.1:133(16|17)/fandian_catalog_test_[a-z0-9_]+\\?.*"))throw new IllegalStateException("Refusing non-test database");return settings;}
         @Bean DataSource dataSource(Properties settings){return new DriverManagerDataSource(settings.getProperty("db.url"),settings.getProperty("db.username"),settings.getProperty("db.password"));}
         @Bean DataSourceTransactionManager transactions(DataSource source){return new DataSourceTransactionManager(source);}
         @Bean SqlSessionFactoryBean sqlSessionFactory(DataSource source)throws Exception{

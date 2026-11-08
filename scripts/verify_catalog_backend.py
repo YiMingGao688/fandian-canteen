@@ -15,10 +15,14 @@ state = json.loads((LOCAL / 'state.json').read_text(encoding='utf-8'))
 alias = Path(state['ascii_alias'])
 if alias.resolve() != LOCAL.resolve():
     raise RuntimeError('Unexpected local runtime alias')
-defaults = alias / 'mysql-admin.cnf'
-settings = defaults.read_text(encoding='utf-8')
-if 'host=127.0.0.1' not in settings or 'port=13316' not in settings:
-    raise RuntimeError('Refusing a non-workspace database instance')
+# 默认 13316；主仓库实例占用主端口时，可用 CAMPUS_VERIFY_MYSQL_PORT=13317 连本工作区备用实例。
+port = int(os.environ.get('CAMPUS_VERIFY_MYSQL_PORT', '13316'))
+if port not in (13316, 13317):
+    raise RuntimeError('Refusing a non-local verification port: %d' % port)
+defaults = alias / ('mysql-admin-verify-%d.cnf' % port)
+(LOCAL / ('mysql-admin-verify-%d.cnf' % port)).write_text(
+    '[client]\nuser=root\npassword=' + state['root_password'] + '\nhost=127.0.0.1\nport=%d\nprotocol=TCP\ndefault-character-set=utf8mb4\n' % port,
+    encoding='utf-8')
 database = 'fandian_catalog_test_' + datetime.now().strftime('%Y%m%d_') + uuid.uuid4().hex[:8]
 assert re.fullmatch(r'fandian_catalog_test_[a-z0-9_]+', database)
 mysql = [r'D:\soft\mysql\bin\mysql.exe', '--defaults-extra-file=' + str(defaults), '--batch', '--skip-column-names']
@@ -48,7 +52,7 @@ try:
     media = LOCAL / (database + '_media')
     config = LOCAL / (database + '.properties')
     properties = {
-        'db.url': 'jdbc:mysql://127.0.0.1:13316/' + database + '?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false',
+        'db.url': 'jdbc:mysql://127.0.0.1:%d/' % port + database + '?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false',
         'db.username': 'root', 'db.password': state['root_password'], 'images.path': media.as_posix(),
     }
     config.write_text('\n'.join(key + '=' + escape_property(value) for key, value in properties.items()), encoding='ascii')
