@@ -27,28 +27,23 @@ Page({
       await this.loadSlots()
     })
   },
-  /** 逐份移除已下架/失效的菜品；后端允许对下架菜品执行减一。 */
+  /** 一次请求移除全部失效菜品；无论成功或失败都重新载入，保持页面与服务端一致。 */
   async removeInvalid() {
     if (this.data.busy) return
-    const invalid = this.data.cart.filter(c => c.invalid)
-    if (!invalid.length) return
     this.setData({ busy: true })
     await u.run(this, async () => {
-      for (const item of invalid) {
-        for (let i = 0; i < Number(item.number || 1); i++) {
-          await u.api('/student/cart', 'POST', { dishId: item.dishId, delta: -1 })
-        }
-      }
+      await u.api('/student/cart/invalid', 'DELETE')
       u.toast('已移除失效菜品')
-      await this.load()
     })
+    await this.load()
     this.setData({ busy: false })
   },
   /** 跨窗口等无法单项处理的场景，提供明确的清空入口并立即刷新。 */
   async clearCart() {
     if (this.data.busy) return
     this.setData({ busy: true })
-    await u.run(this, async () => { await u.api('/student/cart', 'DELETE'); await this.load() })
+    await u.run(this, async () => { await u.api('/student/cart', 'DELETE') })
+    await this.load()
     this.setData({ busy: false })
   },
   /** 切换日期后只使用最新一次查询结果，满额时段不可提交。 */

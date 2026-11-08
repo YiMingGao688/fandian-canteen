@@ -7,6 +7,18 @@
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">insert into user(openid,name,create_time) values(#{openid},#{name},#{createTime})</insert>
     <insert id="insertAccount">insert into campus_account(user_id,username,password_hash,display_name,role,window_id,enabled) values(#{userId},#{username},#{passwordHash},#{displayName},#{role},#{windowId},#{enabled})</insert>
     <select id="lockUser" resultType="long">select id from user where id=#{userId} for update</select>
+    <!-- 失效判定与公开菜谱的可见性条件一致：菜品下架、被删除或失去分类/窗口关联都会被一次移除。 -->
+    <delete id="deleteInvalidCart">
+        delete from shopping_cart
+        where user_id = #{userId}
+          and not exists (
+            select 1 from dish d
+            join category c on c.id = d.category_id
+            join campus_dish x on x.dish_id = d.id
+            join campus_window w on w.id = x.window_id
+            where d.id = shopping_cart.dish_id and d.status = 1
+          )
+    </delete>
     <select id="windows" resultType="com.sky.campus.CampusModels$Window">select * from campus_window order by id</select>
     <select id="window" resultType="com.sky.campus.CampusModels$Window">select * from campus_window where id=#{id}</select>
     <sql id="dishQuery">

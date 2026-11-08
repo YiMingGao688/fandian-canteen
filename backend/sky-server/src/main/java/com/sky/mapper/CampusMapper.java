@@ -22,6 +22,8 @@ public interface CampusMapper {
     void insertAccount(Account account);
     /** 在事务内锁定用户，串行处理其购物车与重复提交。 */
     Long lockUser(@Param("userId") Long userId);
+    /** 一次清理当前学生购物车中已下架或不再出现在公开菜谱中的菜品，返回移除行数。 */
+    int deleteInvalidCart(@Param("userId") Long userId);
     /** 查询公开窗口，包含暂停状态供客户端提示。 */
     List<Window> windows();
     /** 查询单个窗口，供预约和权限校验。 */
