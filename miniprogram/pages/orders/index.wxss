@@ -1,190 +1,94 @@
-page {
-  overflow-x: hidden;
-}
-
-.orders-page {
-  width: 100%;
-  min-height: 100vh;
-  background-color: #f8f7f1;
-}
-
-/* 原生导航与页面交界使用同一底色，覆盖切页时顶部残留的像素。 */
-.orders-top-edge {
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 2px;
-  background-color: #f8f7f1;
-  pointer-events: none;
-}
-
-.orders-intro {
-  margin: 16rpx 0;
-}
-
-.order-filters,
-.order-card {
-  width: 100%;
-  max-width: 100%;
-}
-
-.food-name {
-  min-width: 0;
-  font-size: 30rpx;
-  font-weight: 600;
-}
-
-.order-status,
-.order-item-image {
-  flex-shrink: 0;
-}
+/* 卡片、筛选和弹层在窄屏下可换行，取餐凭证保持完整。 */
+.order-filters { max-width: 100%; }
+.order-card { width: 100%; padding: 16px; }
+.order-card-heading { align-items: flex-start; }
+.food-name { min-width: 0; font-size: 18px; font-weight: 650; overflow-wrap: anywhere; }
+.order-status { flex: none; white-space: nowrap; }
+.order-status-1 { background: #fcf1df; color: #84561c; }
+.order-status-2, .order-status-3 { background: #eef2ee; color: #4d6151; }
+.order-status-5, .order-status-6 { background: #f1f3ef; color: #565e54; }
 
 .order-time {
-  margin: 18rpx 0;
-}
-
-.order-item-image {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 12rpx;
-}
-
-.order-item-name {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: break-word;
-}
-
-.order-summary {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12rpx 18rpx;
+  gap: 3px 10px;
+  margin: 8px 0 10px;
+  color: #5e655e;
+  font-size: 14px;
 }
-
-.order-price {
-  white-space: nowrap;
-}
-
-.order-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10rpx;
-  max-width: 100%;
-  margin-left: auto;
-}
-
-.order-actions button {
-  flex: none;
-  width: auto;
-  min-width: 44px;
-  min-height: 44px;
-  margin: 0;
-  padding: 8rpx 16rpx;
-  font-size: 24rpx;
-  white-space: nowrap;
-}
-
-.order-pay {
-  width: 100%;
-  min-height: 44px;
-  margin: 16rpx 0 0;
-  font-weight: 600;
-}
-
-.order-number {
-  margin-top: 18rpx;
-  overflow-wrap: break-word;
-}
+.order-item-image { flex: none; width: 46px; height: 46px; border-radius: 11px; background: #eef1ec; }
+.order-location { margin-top: 4px; }
+.order-item-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.order-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px; }
+.order-total { display: flex; flex-direction: column; gap: 1px; }
+.order-price { overflow-wrap: anywhere; }
+.order-actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; max-width: 100%; margin-left: auto; }
+.orders-page .order-actions button { width: auto; min-width: 0; max-width: none; margin: 0; padding: 8px 11px; font-size: 14px; white-space: nowrap; }
+.orders-page button.order-pay { display: block; width: 100%; max-width: none; margin: 12px 0 0; font-weight: 600; }
+.order-number { margin-top: 11px; }
 
 .ticket {
-  margin-top: 26rpx;
-  padding: 26rpx;
-  border: 1rpx dashed #b8c69e;
-  border-radius: 16rpx;
-  background: #eaf0df;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #dde9e0;
+  border-radius: 16px;
+  background: #f3f8f4;
 }
-
+.ticket-ready { border-color: #bfe5d3; background: #ddf5e9; }
+.ticket .tiny { color: #436151; }
 .code {
-  margin: 8rpx 0;
-  color: #345337;
-  font-size: 48rpx;
+  margin: 4px 0;
+  color: #163f2f;
+  font-size: 31px;
   font-weight: 700;
-  letter-spacing: 8rpx;
+  letter-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
-.order-sheet-title {
-  min-width: 0;
-  font-size: 36rpx;
-  font-weight: 650;
-}
+.orders-sheet { max-height: 88vh; }
+.orders-sheet button { width: auto; max-width: none; margin: 0; }
+.order-sheet-title { min-width: 0; font-size: 22px; font-weight: 650; overflow-wrap: anywhere; }
+.orders-mask .close { flex: none; width: 44px; height: 44px; }
+.review-stars { flex-wrap: wrap; margin-top: 12px; color: #99601d; font-size: 30px; }
+.review-stars text { padding: 0 3px; }
 
-.orders-mask .close {
-  flex: none;
-  width: 44px;
-  min-height: 44px;
-  margin: 0;
-  padding: 0;
-}
-
-.orders-mask .full {
-  width: 100%;
-  min-height: 44px;
-}
-
-.review-stars {
-  margin-top: 30rpx;
-  color: #b58c48;
-  font-size: 48rpx;
-}
-
+.payment-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.payment-heading > view { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.payment-subtitle { margin-top: 3px; color: var(--muted); font-size: 13px; }
 .payment-total {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
-  margin: 22rpx 0;
-  padding: 28rpx 16rpx;
-  border-radius: 22rpx;
-  background: #eaf0e1;
+  gap: 6px;
+  margin: 16px 0 12px;
+  padding: 20px 12px;
+  border-radius: 18px;
+  background: #e9f7ef;
 }
-
+.payment-total-label { color: var(--muted); font-size: 13px; }
 .payment-amount {
-  color: #294f39;
-  font-size: 56rpx;
+  max-width: 100%;
+  color: #173d2c;
+  font-size: 34px;
   font-weight: 700;
   line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
+.payment-details { padding: 7px 14px; border: 1px solid var(--line); border-radius: 16px; background: #fbfcfa; }
+.payment-window { gap: 12px; padding: 7px 0; }
+.payment-window text:last-child { flex: 1; min-width: 0; text-align: right; overflow-wrap: anywhere; }
+.payment-location { padding: 7px 0 2px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.orders-sheet button.full { display: block; width: 100%; max-width: none; margin: 14px 0 0; }
+.payment-options { display: flex; gap: 8px; margin-top: 8px; }
+.payment-options button { flex: 1 1 0; width: auto; min-width: 0; padding: 8px 7px; font-size: 13px; white-space: nowrap; }
+.payment-footnote { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; text-align: center; }
 
-.payment-window {
-  gap: 24rpx;
-  padding: 12rpx 0;
-}
-
-.payment-window text:last-child {
-  flex: 1;
-  min-width: 0;
-  text-align: right;
-  overflow-wrap: break-word;
-}
-
-.payment-options {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 16rpx;
-}
-
-.payment-options button {
-  flex: 1 1 0;
-  width: auto;
-  min-width: 0;
-  min-height: 44px;
-  margin: 0;
-  padding-right: 12rpx;
-  padding-left: 12rpx;
-  white-space: nowrap;
+@media (max-width: 350px) {
+  .order-card { padding: 13px; }
+  .orders-page .order-actions button { padding-right: 8px; padding-left: 8px; font-size: 13px; }
+  .code { font-size: 27px; letter-spacing: 2px; }
+  .payment-options { gap: 6px; }
+  .payment-options button { font-size: 12px; }
 }

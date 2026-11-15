@@ -1,1 +1,104 @@
-.profile-card{padding:48rpx 22rpx;margin-bottom:26rpx;background:#e9efdf;border-radius:28rpx;text-align:center}.profile-card .title{font-size:36rpx}.profile-card .note{margin:15rpx 0 25rpx}.profile-card button{display:inline-block;padding:18rpx 35rpx}.avatar{margin:0 auto 25rpx;background:#d6e3c7;color:#486640;border-radius:50%;width:110rpx;height:110rpx;line-height:110rpx;font-size:45rpx}.menu-link{display:flex;justify-content:space-between;padding:26rpx 0;border-bottom:1rpx solid #edf0e6}.menu-link:last-child{border:0}.menu-link text:last-child{font-size:23rpx;color:#819076}
+.profile-page { padding-top: 14px; }
+
+.profile-account {
+  padding: 20px;
+  border-radius: 19px;
+  background: #193d30;
+  color: #fff;
+}
+
+.profile-identity { display: flex; align-items: center; gap: 13px; }
+.profile-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #e7f3e6;
+}
+.profile-mark image { width: 38px; height: 38px; }
+.profile-intro { flex: 1; min-width: 0; }
+.profile-name, .profile-account-detail { display: block; overflow-wrap: anywhere; }
+.profile-name { font-size: 23px; font-weight: 700; line-height: 1.25; }
+.profile-account-detail { margin-top: 4px; color: #d2e5d9; font-size: 13px; }
+.profile-login-row { display: flex; justify-content: flex-start; margin-top: 17px; }
+.profile-account button.profile-login { width: auto; max-width: none; min-width: 142px; min-height: 44px; margin: 0; padding: 8px 16px; }
+
+.profile-menu {
+  overflow: hidden;
+  margin-top: 16px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+/* 覆盖微信原生按钮的居中和最大宽度，确保分隔线和点击区域对齐。 */
+.profile-menu button.profile-menu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+  min-height: 60px;
+  margin: 0;
+  padding: 9px 2px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+.profile-menu-link + .profile-menu-link { border-top: 1px solid var(--line); }
+.profile-menu-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+  background: var(--mint);
+  color: #29634c;
+}
+.profile-menu-icon image { width: 20px; height: 20px; }
+.profile-favorites-icon { background: #f5eee3; color: #795231; font-size: 23px; line-height: 1; }
+.profile-feedback-icon { background: #edf0f3; }
+.profile-menu-label { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.profile-menu-arrow { margin-right: 4px; color: #647469; }
+
+.profile-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; margin-top: 9px; }
+.profile-page button.profile-action {
+  flex: none;
+  width: auto;
+  max-width: none;
+  min-width: 44px;
+  margin: 0;
+  padding: 8px 2px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+.profile-page button.profile-logout { color: #8c4b3c; }
+.profile-settings { margin: 0; border-radius: 16px; }
+.profile-settings-note { margin-top: 8px; }
+.profile-settings-error { margin-top: 9px; color: #8a4d2d; font-size: 13px; overflow-wrap: anywhere; }
+.profile-settings button.profile-save { width: 100%; max-width: none; margin: 13px 0 0; }
+
+.profile-connection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 8px 13px;
+  border: 1px solid #eadcc4;
+  border-radius: 13px;
+  background: #fcf6e9;
+  color: #704e2e;
+}
+.profile-connection-copy { flex: 1; min-width: 0; font-size: 13px; overflow-wrap: anywhere; }
+.profile-connection-copy text { display: block; }
+.profile-connection-title { font-weight: 700; }
+.profile-page .profile-connection .profile-action { color: #704e2e; }

@@ -5,6 +5,7 @@
       wx:for="{{dateOptions}}"
       wx:key="key"
       class="pickup-choice pickup-date {{index === dateIndex ? 'pickup-selected' : ''}}"
+      aria-label="{{item.name + ' ' + item.date + (index === dateIndex ? '，已选中' : '')}}"
       data-index="{{index}}"
       disabled="{{busy}}"
       bindtap="selectDate"
@@ -30,6 +31,7 @@
         <button
           wx:if="{{expanded || index < 4 || index === slotIndex}}"
           class="pickup-choice pickup-slot {{index === slotIndex ? 'pickup-selected' : ''}}"
+          aria-label="{{item.startTime + ' 至 ' + item.endTime + (index === slotIndex ? '，已选中' : '')}}"
           data-index="{{index}}"
           disabled="{{busy}}"
           bindtap="selectSlot"

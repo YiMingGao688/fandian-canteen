@@ -67,6 +67,8 @@ public class CampusController {
     @GetMapping("/student/feedback") public Result<List<Map<String,Object>>> feedback() { return Result.success(catalog.feedback(false)); }
     /** 当前人员所属窗口的订单。 */
     @GetMapping("/staff/orders") public Result<List<OrderView>> staffOrders() { return Result.success(orders.list(true)); }
+    /** 已认证窗口人员或管理员申请一次性短期票据，用于建立权限范围内的订单推送连接。 */
+    @PostMapping("/staff/ws-ticket") public Result<String> wsTicket() { return Result.success(orders.issueManagementSocketTicket()); }
     /** 窗口确认预约，开始备餐。 */
     @PostMapping("/staff/orders/{id}/accept") public Result<OrderView> accept(@PathVariable Long id) { return Result.success(orders.advance(id, false)); }
     /** 窗口完成备餐，预约进入待取餐状态。 */

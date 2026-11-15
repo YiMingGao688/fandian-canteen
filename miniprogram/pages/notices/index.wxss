@@ -1,0 +1,8 @@
+.notice-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 10px; }
+.notice-title { display: block; margin: 9px 0 5px; font-size: 18px; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
+.notice-content, .feedback-content, .feedback-reply { white-space: pre-wrap; overflow-wrap: anywhere; }
+.notice-content { color: #474f45; line-height: 1.65; }
+.feedback-form .notice-title { margin-top: 0; }
+.feedback-form textarea { min-height: 105px; }
+.feedback-content { margin-top: 7px; }
+.feedback-reply { color: #245b47; }

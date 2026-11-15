@@ -2,41 +2,74 @@ const config = require('./config')
 const SESSION_KEY = 'hexu.mini.session'
 const BASE_KEY = 'hexu.mini.server'
 
-function server() {
-  const saved = wx.getStorageSync(BASE_KEY)
-  if (saved) return saved
+/** 开发者工具和真机分别使用各自的默认地址与本地覆盖值。 */
+function isSimulator() {
   let platform = 'devtools'
   try { platform = (wx.getDeviceInfo ? wx.getDeviceInfo() : wx.getSystemInfoSync()).platform } catch (_) { /* 模拟环境沿用电脑接口地址。 */ }
-  return platform === 'devtools' ? config.simulatorServer : config.previewServer || config.simulatorServer
+  return platform === 'devtools'
+}
+function server() {
+  return isSimulator() ? wx.getStorageSync(BASE_KEY + '.devtools') || config.simulatorServer
+    : wx.getStorageSync(BASE_KEY) || config.previewServer || config.simulatorServer
 }
 function session() { return wx.getStorageSync(SESSION_KEY) || {} }
 function logout() { wx.removeStorageSync(SESSION_KEY) }
 function saveSession(value) { wx.setStorageSync(SESSION_KEY, value) }
-function setServer(value) {
+function normalizeServer(value) {
   const base = String(value || '').trim().replace(/\/+$/, '')
   if (!/^https?:\/\/[^\s/?#]+$/.test(base)) throw new Error('请输入完整的 http(s)://主机:端口，不包含路径')
-  if (base !== server()) logout()
-  wx.setStorageSync(BASE_KEY, base)
+  return base
 }
 
-/** 使用现有校园 JWT 与 Result 协议；令牌仅发送给用户设置的当前服务器。 */
-function api(path, method = 'GET', data) {
+/** 验证候选地址后再保存。连接失败时当前地址和登录状态仍可使用。 */
+async function setServer(value) {
+  const base = normalizeServer(value)
+  const previous = server()
+  const windows = await api('/public/windows', 'GET', undefined, base)
+  if (!Array.isArray(windows)) throw new Error('此地址没有返回饭点的窗口列表')
+  if (previous !== server()) throw new Error('服务器地址已变化，请重新检查')
+  wx.setStorageSync(isSimulator() ? BASE_KEY + '.devtools' : BASE_KEY, base)
+  if (base !== previous) logout()
+}
+
+/** 使用现有校园 JWT 与 Result 协议，过时的响应不能写入当前会话。 */
+function api(path, method = 'GET', data, probeServer) {
+  const activeServer = server()
+  const base = probeServer || activeServer
+  const authenticated = !probeServer && !path.startsWith('/public/') && !path.startsWith('/auth/')
+  const token = authenticated ? session().token : null
+  const current = () => activeServer === server() && (!authenticated || token === session().token)
+  const changed = () => Object.assign(new Error('账号或服务器已切换，请重试'), { sessionChanged: true })
   return new Promise((resolve, reject) => {
-    wx.request({ url: `${server()}/campus${path}`, method, data, timeout: 15000,
-      header: { 'Content-Type': 'application/json', ...(session().token ? { Authorization: `Bearer ${session().token}` } : {}) },
+    wx.request({ url: `${base}/campus${path}`, method, data, timeout: 15000,
+      header: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       success(response) {
-        if (response.statusCode === 401) { logout(); reject(new Error('登录已失效，请重新登录')); return }
-        if (response.statusCode < 200 || response.statusCode >= 300 || !response.data || response.data.code !== 1) {
-          reject(new Error(response.data && response.data.msg || '服务暂不可用')); return
+        if (!current()) return reject(changed())
+        if (response.statusCode === 401) {
+          if (token) logout()
+          return reject(new Error('登录已失效，请重新登录'))
         }
-        resolve(response.data.data)
-      }, fail() { reject(new Error('连接失败，请在“我的”检查服务器地址和网络')) }
+        const { statusCode, data: result } = response
+        const ok = statusCode >= 200 && statusCode < 300
+        if (ok && result?.code === 1) return resolve(result.data)
+        const error = new Error(result?.msg || '服务暂不可用')
+        // 预约收到 Result 业务拒绝即可重新编辑，超时或服务异常需要先确认原请求。
+        error.uncertain = statusCode === 408 || statusCode >= 500 || (ok && result?.code !== 0)
+        reject(error)
+      },
+      fail() {
+        if (!current()) return reject(changed())
+        const connectionMessage = base === config.simulatorServer && isSimulator()
+          ? '本机服务未连接，请启动饭点后重试'
+          : '无法连接服务器，请检查地址和网络'
+        reject(Object.assign(new Error(connectionMessage), { uncertain: true }))
+      },
     })
   })
 }
 function toast(title) { wx.showToast({ title: String(title), icon: 'none', duration: 2500 }) }
 async function run(page, task) {
-  try { return await task() } catch (error) { toast(error.message); return null }
+  try { return await task() } catch (error) { if (!error.sessionChanged) toast(error.message); return null }
   finally { wx.stopPullDownRefresh() }
 }
 function ensureStudent() {
@@ -62,4 +95,4 @@ function order(value) {
   const status = Number(value.status)
   return { ...value, status, statusText: statuses[status], amountText: money(value.amount), items: (value.items || []).map(item => ({ ...item, image: image(item.image) })) }
 }
-module.exports = { api, server, setServer, session, saveSession, logout, toast, run, ensureStudent, requestId, date, money, image, dish, order, statuses }
+module.exports = { api, server, setServer, isSimulator, session, saveSession, logout, toast, run, ensureStudent, requestId, date, money, image, dish, order, statuses }

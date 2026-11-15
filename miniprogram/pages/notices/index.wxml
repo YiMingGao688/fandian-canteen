@@ -1,1 +1,35 @@
-<view class="page tab-page"><view class="eyebrow">NEWS FROM YOUR CANTEEN</view><view class="title">校园公告</view><view class="note">关于好好吃饭，还有这些小事。</view><view wx:for="{{notices}}" wx:key="id" class="card"><view class="row between"><text class="pill">{{item.category}}</text><text class="tiny">{{item.publishedAt}}</text></view><view class="heading"><text>{{item.title}}</text></view><view style="white-space:pre-wrap">{{item.content}}</view></view><view wx:if="{{!notices.length}}" class="empty">暂时没有公告，下拉刷新重试。</view><view class="card"><view class="heading"><text>你的声音，我们听见。</text></view><view class="field"><text class="label">想对哪个窗口说</text><picker range="{{windows}}" range-key="name" value="{{windowIndex}}" bindchange="window"><view class="select">{{windows[windowIndex].name || '选择窗口'}}　⌄</view></picker></view><textarea class="field" value="{{content}}" bindinput="content" maxlength="500" placeholder="请写下遇到的问题或建议"/><button class="primary full" disabled="{{busy}}" loading="{{busy}}" bindtap="submit">发送反馈</button></view><view wx:if="{{feedback.length}}" class="heading"><text>我的反馈</text></view><view wx:for="{{feedback}}" wx:key="id" class="card"><view class="tiny">{{item.windowName}} · {{item.createdAt}}</view><view class="note" style="color:#3e513b">{{item.content}}</view><view class="split">{{item.reply ? '窗口回复：' + item.reply : '等待窗口回复'}}</view></view></view>
+<view class="page tab-page notices-page dock-metrics">
+  <view class="section-header">
+    <view class="section-intro">
+      <view class="title">食堂公告</view>
+      <view class="muted">校园食堂动态与窗口反馈</view>
+    </view>
+    <view class="section-symbol"><image src="/assets/tab-bar/bell.svg" mode="aspectFit" aria-hidden="true" /></view>
+  </view>
+
+  <view wx:for="{{notices}}" wx:key="id" class="card notice-card">
+    <view class="notice-meta"><text class="pill">{{item.category}}</text><text class="tiny">{{item.publishedAt}}</text></view>
+    <text class="notice-title">{{item.title}}</text>
+    <view class="notice-content">{{item.content}}</view>
+  </view>
+  <view wx:if="{{!notices.length}}" class="empty">暂时没有公告，可以下拉刷新。</view>
+
+  <view class="card feedback-form">
+    <view class="notice-title">给窗口留言</view>
+    <view class="field">
+      <text class="label">选择窗口</text>
+      <picker range="{{windows}}" range-key="name" value="{{windowIndex}}" bindchange="window">
+        <view class="select">{{windows[windowIndex].name || '选择窗口'}} <text aria-hidden="true">⌄</text></view>
+      </picker>
+    </view>
+    <textarea class="field" value="{{content}}" bindinput="content" maxlength="500"
+      placeholder="请写下遇到的问题或建议" aria-label="反馈内容" />
+    <button class="primary full" disabled="{{busy}}" loading="{{busy}}" bindtap="submit">发送反馈</button>
+  </view>
+  <view wx:if="{{feedback.length}}" class="heading"><text>我的反馈</text></view>
+  <view wx:for="{{feedback}}" wx:key="id" class="card">
+    <view class="tiny">{{item.windowName}} · {{item.createdAt}}</view>
+    <view class="feedback-content">{{item.content}}</view>
+    <view class="split feedback-reply">{{item.reply ? '窗口回复：' + item.reply : '等待窗口回复'}}</view>
+  </view>
+</view>

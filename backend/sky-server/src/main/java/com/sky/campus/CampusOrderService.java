@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.*;
@@ -147,6 +149,7 @@ public class CampusOrderService {
         mapper.insertOrder(record); cart.cleanShoppingCart();
         // 事务提交后再清缓存，避免并发读在提交前把旧库存重新写回。
         catalog.invalidateMenu();
+        notifyManagementAfterCommit(slot.getWindowId(), order.getId(), Orders.PENDING_PAYMENT);
         return full(mapper.order(order.getId()));
     }
 
@@ -166,6 +169,7 @@ public class CampusOrderService {
         require(order.getOrderTime().isAfter(now().minusMinutes(15)), "预约已超过支付时限，请取消后重新预约");
         mapper.setPickupCode(id, pickupCode());
         orders.update(Orders.builder().id(id).status(Orders.TO_BE_CONFIRMED).payStatus(Orders.PAID).payMethod(0).checkoutTime(now()).build());
+        notifyManagementAfterCommit(order.getWindowId(), id, Orders.TO_BE_CONFIRMED);
         return full(mapper.order(id));
     }
 
@@ -226,6 +230,7 @@ public class CampusOrderService {
         mapper.setPickupCode(id, pickupCode());
         orders.update(Orders.builder().id(id).status(Orders.TO_BE_CONFIRMED).payMethod(2)
                 .payStatus(Orders.PAID).checkoutTime(now()).build());
+        notifyManagementAfterCommit(order.getWindowId(), id, Orders.TO_BE_CONFIRMED);
         // 交易号只用于回调链路审计，不写入原订单表，避免无必要的结构迁移。
         log.info("支付宝沙箱支付已确认，商户订单号：{}，支付宝交易号：{}", orderNo, transactionNo);
     }
@@ -272,6 +277,7 @@ public class CampusOrderService {
         require(catalog.withinHours(window,target),"新时段已不在当前营业时间内，原预约保持不变");
         require(mapper.reserveSlot(slotId) == 1, "新时段已满，原预约保持不变");
         mapper.releaseSlot(order.getSlotId()); mapper.reschedule(id, slotId, start);
+        notifyManagementAfterCommit(order.getWindowId(), id, order.getStatus());
         return full(mapper.order(id));
     }
 
@@ -283,6 +289,17 @@ public class CampusOrderService {
     public List<OrderView> list(boolean staff) {
         List<OrderView> result = mapper.orders(staff ? null : BaseContext.getCurrentId(), staff ? catalog.staffWindow() : null);
         result.forEach(this::full); return result;
+    }
+
+    /**
+     * 根据已验证的校园管理身份签发短期推送票据，窗口人员仅能订阅本人窗口，管理员可订阅全校。
+     * @return 30 秒内可兑换一次的随机票据，不返回长期登录令牌
+     * @throws com.sky.exception.BaseException 当前身份不是有效窗口人员或管理员
+     */
+    public String issueManagementSocketTicket() {
+        Account account = auth.current();
+        require("ADMIN".equals(account.getRole()) || ("STAFF".equals(account.getRole()) && account.getWindowId() != null), "当前账号没有预约推送权限");
+        return CampusOrderPushHub.issueTicket("ADMIN".equals(account.getRole()) ? null : account.getWindowId());
     }
 
     /**
@@ -327,7 +344,9 @@ public class CampusOrderService {
         int target = ready ? 4 : 3;
         if (order.getStatus() == target) return full(order);
         require(order.getStatus() == target - 1 && order.getPayStatus() == 1, "当前状态无法执行此操作");
-        orders.update(Orders.builder().id(id).status(target).build()); return full(mapper.order(id));
+        orders.update(Orders.builder().id(id).status(target).build());
+        notifyManagementAfterCommit(order.getWindowId(), id, target);
+        return full(mapper.order(id));
     }
 
     /**
@@ -346,6 +365,7 @@ public class CampusOrderService {
         orders.update(Orders.builder().id(id).status(Orders.COMPLETED).deliveryTime(now()).build());
         mapper.markPickedUp(id);
         catalog.invalidateMenu();
+        notifyManagementAfterCommit(order.getWindowId(), id, Orders.COMPLETED);
         return full(mapper.order(id));
     }
 
@@ -375,6 +395,24 @@ public class CampusOrderService {
         orders.update(Orders.builder().id(order.getId()).status(Orders.CANCELLED)
                 .payStatus(order.getPayStatus() == 1 ? Orders.REFUND : Orders.UN_PAID).cancelReason(reason).cancelTime(now()).build());
         catalog.invalidateMenu();
+        notifyManagementAfterCommit(order.getWindowId(), order.getId(), Orders.CANCELLED);
+    }
+
+    /**
+     * 只在订单事务成功提交后广播窗口、订单主键和新状态，避免管理端收到未提交或已回滚的变化。
+     * @param windowId 订单所属窗口，用于限制工作人员接收范围
+     * @param orderId 已变更订单主键
+     * @param status 提交后的订单状态
+     */
+    private void notifyManagementAfterCommit(Long windowId, Long orderId, int status) {
+        Runnable publish = () -> CampusOrderPushHub.publish(windowId, orderId, status);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { publish.run(); }
+            });
+        } else {
+            publish.run();
+        }
     }
 
     /** 使用原明细 Mapper 补齐订单快照，不从前端接收菜价或已支付状态。 */

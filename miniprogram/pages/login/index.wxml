@@ -1,1 +1,54 @@
-<view class="page"><view class="eyebrow">饭点 · CAMPUS DINING</view><view class="title">{{registering ? '一起，好好吃饭。' : '欢迎回来。'}}</view><view class="note">使用学号登录，预约下一餐。</view><view class="card"><view class="field"><text class="label">学号</text><input value="{{username}}" data-field="username" bindinput="input" maxlength="16" placeholder="请输入学号"/></view><view wx:if="{{registering}}" class="field"><text class="label">怎么称呼你</text><input value="{{displayName}}" data-field="displayName" bindinput="input" maxlength="24" placeholder="2 至 24 字"/></view><view class="field"><text class="label">密码</text><input value="{{password}}" password data-field="password" bindinput="input" maxlength="64" placeholder="8 至 64 位密码"/></view><button class="primary full" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">{{registering ? '注册并登录' : '登录饭点'}}</button><button class="link full" bindtap="toggle">{{registering ? '已有账号？返回登录' : '第一次来？用学号注册'}}</button></view></view>
+<view class="login-page dock-metrics {{registering ? 'register-page' : ''}}">
+  <view wx:if="{{!registering}}" class="login-cover">
+    <image src="/assets/images/chicken.jpg" mode="aspectFill" aria-hidden="true" />
+    <view class="login-cover-shade" />
+    <view class="login-intro">
+      <text class="login-title">欢迎回来。</text>
+      <text class="login-subtitle">用学号登录，选好下一餐。</text>
+    </view>
+  </view>
+
+  <view wx:if="{{registering}}" class="register-intro">
+    <view class="register-mark"><image src="/assets/images/fandian-mark.png" mode="aspectFit" aria-hidden="true" /></view>
+    <view class="register-intro-copy">
+      <text class="register-title">创建饭点账号</text>
+      <text class="register-subtitle">用学号注册，预约食堂取餐</text>
+    </view>
+  </view>
+
+  <view class="login-form">
+    <view class="field {{errorField === 'username' ? 'login-field-invalid' : ''}}">
+      <text class="label">学号</text>
+      <input class="login-input {{focusField === 'username' ? 'login-input-focused' : ''}}" type="{{registering ? 'number' : 'text'}}" value="{{username}}"
+        data-field="username" bindinput="input" bindfocus="focus" bindblur="blur" bindconfirm="nextField" focus="{{focusField === 'username'}}"
+        maxlength="16" disabled="{{busy}}" placeholder="{{registering ? '8 至 16 位数字' : '请输入学号'}}"
+        placeholder-class="login-placeholder" confirm-type="next" aria-label="学号" />
+    </view>
+    <view wx:if="{{registering}}" class="field {{errorField === 'displayName' ? 'login-field-invalid' : ''}}">
+      <text class="label">称呼</text>
+      <input class="login-input {{focusField === 'displayName' ? 'login-input-focused' : ''}}" value="{{displayName}}"
+        data-field="displayName" bindinput="input" bindfocus="focus" bindblur="blur" bindconfirm="nextField" focus="{{focusField === 'displayName'}}"
+        maxlength="24" disabled="{{busy}}" placeholder="2 至 24 字" placeholder-class="login-placeholder" confirm-type="next" aria-label="称呼" />
+    </view>
+    <view class="field {{errorField === 'password' ? 'login-field-invalid' : ''}}">
+      <text class="label">密码</text>
+      <view class="login-password">
+        <input class="login-input {{focusField === 'password' ? 'login-input-focused' : ''}}" value="{{password}}" password="{{!passwordVisible}}"
+          data-field="password" bindinput="input" bindfocus="focus" bindblur="blur" bindconfirm="submit" focus="{{focusField === 'password'}}"
+          maxlength="64" disabled="{{busy}}" placeholder="8 至 64 位字符" placeholder-class="login-placeholder"
+          confirm-type="done" aria-label="密码" />
+        <button class="login-password-toggle" disabled="{{busy}}" bindtap="togglePassword"
+          aria-label="{{passwordVisible ? '隐藏密码' : '显示密码'}}">{{passwordVisible ? '隐藏' : '显示'}}</button>
+      </view>
+    </view>
+    <view wx:if="{{error}}" class="login-error" role="alert">{{error}}</view>
+    <button class="login-submit" loading="{{busy}}" disabled="{{busy}}" bindtap="submit" hover-class="pressed">
+      <text>{{registering ? '注册并登录' : '登录饭点'}}</text>
+      <text class="login-arrow" aria-hidden="true">→</text>
+    </button>
+    <view class="login-switch-row">
+      <text>{{registering ? '已有账号？' : '第一次来？'}}</text>
+      <button class="login-switch" disabled="{{busy}}" bindtap="toggle" hover-class="pressed">{{registering ? '去登录' : '用学号注册'}}</button>
+    </view>
+  </view>
+</view>

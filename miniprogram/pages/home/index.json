@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "饭点",
+  "navigationBarBackgroundColor": "#f3f5f2",
   "enablePullDownRefresh": true
 }

@@ -45,6 +45,32 @@ async function load(){if(!isStaff.value)return;loading.value=true;await attempt(
 /** 每五秒轻量同步预约；页面隐藏或上次请求未结束时跳过，避免重复压数据库。 */
 let orderSyncing=false
 async function syncOrders(){if(!isStaff.value||tab.value==='orders'||document.hidden||loading.value||orderSyncing)return;orderSyncing=true;try{orders.value=await api('/staff/orders')}catch{/* 总览队列轻量同步；订单模块独立轮询当前服务端分页。 */}finally{orderSyncing=false}}
+/** 为当前管理会话申请短期票据，再通过同源 Vite 代理建立订单推送连接。 */
+let orderSocket,orderSocketRetry,socketGeneration=0,retryDelay=1000
+function stopOrderSocket(){socketGeneration++;clearTimeout(orderSocketRetry);orderSocketRetry=null;if(orderSocket){const current=orderSocket;orderSocket=null;if(current.readyState< WebSocket.CLOSING)current.close(1000,'session changed')}state.orderSocketConnected=false}
+function retryOrderSocket(generation,token){if(generation!==socketGeneration||token!==state.token)return;clearTimeout(orderSocketRetry);const delay=retryDelay;retryDelay=Math.min(retryDelay*2,30000);orderSocketRetry=setTimeout(connectOrderSocket,delay)}
+async function connectOrderSocket(){
+  const generation=++socketGeneration,token=state.token
+  if(!token||!isStaff.value)return
+  try{
+    const ticket=await api('/staff/ws-ticket',{method:'POST'})
+    if(generation!==socketGeneration||token!==state.token)return
+    const scheme=location.protocol==='https:'?'wss:':'ws:'
+    const socket=new WebSocket(`${scheme}//${location.host}/campus/ws?ticket=${encodeURIComponent(ticket)}`)
+    orderSocket=socket
+    socket.onopen=()=>{if(generation!==socketGeneration||token!==state.token){socket.close(1000,'session changed');return}retryDelay=1000;state.orderSocketConnected=true}
+    socket.onmessage=event=>{
+      if(generation!==socketGeneration||token!==state.token)return
+      try{if(JSON.parse(event.data).type!=='order.changed')return}catch{return}
+      state.orderRevision++
+      if(tab.value!=='orders')syncOrders()
+      if(tab.value==='dashboard')api('/staff/dashboard').then(value=>{if(generation===socketGeneration)dashboard.value=value}).catch(()=>{})
+    }
+    socket.onerror=()=>socket.close()
+    socket.onclose=()=>{if(orderSocket===socket)orderSocket=null;state.orderSocketConnected=false;retryOrderSocket(generation,token)}
+  }catch{retryOrderSocket(generation,token)}
+}
+watch(()=>state.token,token=>{stopOrderSocket();retryDelay=1000;if(token&&isStaff.value)connectOrderSocket()},{immediate:true})
 async function advance(order,operation){busy.value=String(order.id);await attempt(async()=>{await api(`/staff/orders/${order.id}/${operation}`,{method:'POST'});notify(operation==='accept'?'已接单，进入备餐':'已完成备餐，学生可以到窗取餐');await load()});busy.value=''}
 async function pickup(){if(busy.value)return;busy.value='pickup';await attempt(async()=>{pickupResult.value=await api('/staff/pickup',{method:'POST',body:{code:pickupCode.value.trim().toUpperCase()}});pickupCode.value='';notify('取餐核销成功');await load()});busy.value=''}
 /** 单独上下架沿用原接口；同一菜品请求期间禁用重复点击，字段不携带旧库存。 */
@@ -69,7 +95,7 @@ watch(tab, () => globalThis.scrollTo(0, 0), { flush: 'post' })
 watch(()=>state.account?.userId,load)
 let timer,orderTimer
 onMounted(()=>{load();timer=setInterval(()=>{if(!document.hidden)load()},20000);orderTimer=setInterval(syncOrders,5000)})
-onUnmounted(()=>{clearInterval(timer);clearInterval(orderTimer);document.body.classList.remove('premium-admin','admin-dark')})
+onUnmounted(()=>{clearInterval(timer);clearInterval(orderTimer);stopOrderSocket();document.body.classList.remove('premium-admin','admin-dark')})
 </script>
 
 <template>

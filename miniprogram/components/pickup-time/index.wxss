@@ -1,20 +1,7 @@
-.pickup-picker {
-  margin-top: 12rpx;
-  color: #293d30;
-}
-
-.pickup-label {
-  display: block;
-  margin-bottom: 12rpx;
-  font-size: 25rpx;
-  font-weight: 600;
-}
-
-.pickup-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12rpx;
-}
+/* 预约和改约共用双列选择器，深绿标明选中的日期与时段。 */
+.pickup-picker { margin-top: 5px; color: var(--ink, #20211c); }
+.pickup-label { display: block; margin-bottom: 7px; font-size: 15px; font-weight: 700; }
+.pickup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
 .pickup-choice {
   position: relative;
@@ -22,92 +9,42 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 5rpx;
+  gap: 2px;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  min-height: 53px;
   margin: 0;
-  padding: 13rpx 16rpx;
-  border: 1rpx solid #e6e9df;
-  border-radius: 16rpx;
-  background: #f8f8f3;
-  color: #34473a;
+  padding: 8px 10px;
+  border: 1px solid var(--line, #e9eae7);
+  border-radius: 9px;
+  background: var(--soft, #f3f5f2);
+  color: var(--ink, #20211c);
   line-height: 1.35;
   text-align: left;
 }
 
-.pickup-choice::after,
-.pickup-text-button::after {
-  border: 0;
-}
-
-.pickup-choice.pickup-selected {
-  border-color: #88a588;
-  background: #e8f0e3;
-  color: #28543b;
-}
-
-.pickup-date-name,
-.pickup-slot-time {
-  font-size: 27rpx;
-  font-weight: 600;
-}
-
-.pickup-slot-time {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.pickup-caption {
-  color: #627461;
-  font-size: 21rpx;
-}
-
-.pickup-date-check {
-  position: absolute;
-  top: 50%;
-  right: 16rpx;
-  transform: translateY(-50%);
-  color: #386647;
-  font-size: 24rpx;
-}
-
-.pickup-slot-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-top: 24rpx;
-}
+.pickup-choice::after, .pickup-text-button::after { border: 0; }
+.pickup-choice.pickup-selected { border-color: #3d8556; background: var(--mint, #e9f4e5); color: var(--forest, #12663e); }
+.pickup-date { padding-right: 27px; }
+.pickup-date-name, .pickup-slot-time { font-size: 15px; font-weight: 650; overflow-wrap: anywhere; }
+.pickup-slot-time { font-variant-numeric: tabular-nums; }
+.pickup-caption { color: var(--muted, #586155); font-size: 12px; }
+.pickup-date-check { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); color: var(--forest, #12663e); font-size: 16px; font-weight: 700; }
+.pickup-slot-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 8px; margin-top: 15px; }
 
 .pickup-empty {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10rpx;
-  padding: 16rpx;
-  border-radius: 14rpx;
-  background: #f2f3eb;
-  color: #667661;
-  font-size: 23rpx;
+  gap: 4px 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: var(--soft, #f3f5f2);
+  color: var(--muted, #586155);
+  font-size: 14px;
 }
 
-.pickup-text-button {
-  width: auto;
-  min-height: 36px;
-  margin: 0;
-  padding: 6rpx 10rpx;
-  border: 0;
-  background: transparent;
-  color: #315c40;
-  font-size: 23rpx;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.pickup-more {
-  width: 100%;
-  margin-top: 8rpx;
-  text-align: center;
-}
+.pickup-text-button { width: auto; min-height: 38px; margin: 0; padding: 5px 6px; border: 0; background: transparent; color: var(--forest, #12663e); font-size: 13px; font-weight: 650; line-height: 1.45; }
+.pickup-more { width: 100%; margin-top: 4px; text-align: center; }

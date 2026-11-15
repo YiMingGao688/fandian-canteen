@@ -65,7 +65,9 @@ async function loadRemote(){
   finally{if(number===requestNumber)serverLoading.value=false}
 }
 watch([page,pageSize,filter,searchTerm,fromDate,toDate,windowFilter],loadRemote,{immediate:true})
-// 服务端分页由 5 秒轮询维护；父组件的全量总览刷新不再触发订单页重复查询。
+/** WebSocket 事件只作刷新提示，列表仍从权限过滤后的接口读取完整数据。 */
+watch(()=>state.orderRevision,loadRemote)
+// 服务端分页由 WebSocket 事件维护，并保留 5 秒轮询作为断线兜底。
 // 接单、核销等写操作结束后由 busy 变化触发一次即时刷新。
 watch(()=>props.busy,(value,previous)=>{if(previous&&!value)loadRemote()})
 
@@ -90,7 +92,7 @@ async function terminateOrder(){
 
 <template>
   <article class="dispatch-page ed-page">
-    <header class="edition-heading"><div><div class="edition-context">{{ scope }}<span> / </span>{{ dateLabel }}</div><h1>预约订单</h1></div><div class="edition-tools"><span>订单每 5 秒同步</span><button title="刷新预约订单" :disabled="loading||serverLoading" @click="loadRemote();emit('refresh')"><RefreshCw :size="15"/>刷新</button></div></header>
+    <header class="edition-heading"><div><div class="edition-context">{{ scope }}<span> / </span>{{ dateLabel }}</div><h1>预约订单</h1></div><div class="edition-tools"><span>{{ state.orderSocketConnected ? 'WebSocket 实时推送' : '实时推送重连中' }} · 5 秒轮询兜底</span><button title="刷新预约订单" :disabled="loading||serverLoading" @click="loadRemote();emit('refresh')"><RefreshCw :size="15"/>刷新</button></div></header>
     <div class="dispatch-layout">
       <section class="dispatch-board" aria-label="预约处理队列">
         <div class="dispatch-filters ed-filters" aria-label="订单状态筛选"><button v-for="item in filters" :key="item.id" :aria-pressed="filter===item.id" @click="filter=item.id">{{ item.name }}</button></div>

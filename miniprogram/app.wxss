@@ -1,18 +1,227 @@
-page{background:#f8f7f1;color:#25382b;font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;font-size:28rpx;line-height:1.5}view,text,input,textarea,button{box-sizing:border-box}button{font-size:27rpx;border-radius:16rpx;line-height:1.45;padding:22rpx 28rpx;margin:0}button::after{border:0}button[disabled]{opacity:.5}.page{padding:30rpx 28rpx 48rpx}.title{font-size:44rpx;font-weight:650;letter-spacing:1rpx}.eyebrow{font-size:20rpx;letter-spacing:3rpx;color:#8a7653;margin-bottom:10rpx}.muted{color:#788370;font-size:24rpx}.tiny{font-size:22rpx;color:#8b9383}.heading{display:flex;justify-content:space-between;align-items:center;margin:34rpx 0 20rpx}.heading text:first-child{font-weight:600;font-size:32rpx}.row{display:flex;align-items:center;gap:18rpx}.between{justify-content:space-between}.card{background:#fffefa;border:1rpx solid #e9eadf;border-radius:24rpx;padding:28rpx;margin-bottom:22rpx}.primary{background:#294f39;color:#fff}.soft{background:#eaf0e1;color:#35563a}.outline{background:transparent;color:#456043;border:1rpx solid #d7dfcf}.link{background:transparent;padding:10rpx 0;color:#45673c;font-size:25rpx}.danger{color:#a36549}.full{width:100%;margin-top:24rpx}.empty{padding:80rpx 26rpx;text-align:center;color:#7a8774}.empty .primary{margin:30rpx auto;max-width:360rpx}.pill{padding:7rpx 16rpx;border-radius:30rpx;background:#edf2e4;color:#566f43;font-size:22rpx}.price{font-weight:650;font-size:34rpx;color:#9b693b}.field{margin-top:24rpx}.label{display:block;color:#596a52;font-size:25rpx;margin-bottom:12rpx}input,.select,textarea{width:100%;border:1rpx solid #dfe5d6;border-radius:14rpx;background:#fafbf6;padding:22rpx;color:#334a35}input{height:88rpx}textarea{min-height:160rpx}.chips{white-space:nowrap;margin:24rpx 0}.chip{display:inline-block;padding:15rpx 24rpx;margin-right:12rpx;border-radius:28rpx;color:#7a8571;font-size:25rpx;background:#efefe7}.chip.active{background:#294f39;color:#fff}.modal-mask{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(12,30,19,.45);z-index:30;display:flex;align-items:flex-end}.sheet{width:100%;max-height:88vh;overflow:auto;background:#fffef9;border-radius:30rpx 30rpx 0 0;padding:32rpx 28rpx 64rpx}.close{font-size:36rpx;padding:0 14rpx;background:transparent;color:#67785e}.split{border-top:1rpx solid #edf0e5;margin-top:24rpx;padding-top:24rpx}.note{font-size:23rpx;color:#86917d;line-height:1.8;margin:24rpx 0}.error{padding:20rpx 24rpx;border-radius:14rpx;background:#fff0e7;color:#985b3d;margin:22rpx 0;font-size:25rpx}
+@import "./styles/bottom-dock.wxss";
 
-
-/* 浮动底栏、标签页留白和餐盘共用同一组尺寸。 */
 page {
-  --hexu-tab-height: 60px;
-  --hexu-tab-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  --hexu-tab-top: calc(var(--hexu-tab-bottom) + var(--hexu-tab-height));
+  /* 沿用饭点管理端的浅色底、深绿和青柠色。 */
+  --ink: #20211c;
+  --muted: #586155;
+  --line: #e9eae7;
+  --soft: #f3f5f2;
+  --mint: #e9f4e5;
+  --forest: #12663e;
+  --lime: #abf52f;
+  --lime-text: #243018;
+  --dark: #24251f;
+  background: var(--soft);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+view, text, image, scroll-view, input, textarea, button {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button::after { border: 0; }
+button[disabled] { opacity: .48; }
+.pressed { opacity: .72; }
+
+.page {
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 18px 18px 36px;
 }
 
 .page.tab-page {
-  padding-bottom: 88px;
-  padding-bottom: calc(var(--hexu-tab-top) + 20px);
+  padding-bottom: 90px;
+  padding-bottom: calc(var(--tab-space) + 22px);
 }
 
-.modal-mask .sheet {
-  padding-bottom: calc(64rpx + env(safe-area-inset-bottom, 0px));
+.title {
+  color: var(--ink);
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1.23;
+  overflow-wrap: anywhere;
+}
+
+.muted, .tiny, .note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 22px 0 12px;
+}
+
+.heading text:first-child {
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+
+.card {
+  min-width: 0;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.primary { background: var(--forest); color: #fff; }
+.soft { background: var(--mint); color: var(--forest); }
+.outline { border: 1px solid #dfe4de; background: #fff; color: var(--ink); }
+.link { background: transparent; color: var(--forest); padding: 8px 0; font-size: 14px; }
+.danger { color: #9a4938; }
+.full { width: 100%; margin-top: 14px; }
+
+/* 点餐、餐盘和确认页共用主操作按钮。 */
+.reservation-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: var(--lime);
+  color: var(--lime-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+}
+.reservation-button[disabled] { background: #e8ece4; color: #596653; opacity: 1; }
+.chevron { flex: none; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-top: 1.5px solid currentColor; transform: rotate(45deg); }
+.chevron.chevron-down { transform: translateY(-2px) rotate(135deg); }
+.currency { margin-right: 2px; font-size: .68em; font-weight: inherit; }
+
+.empty {
+  padding: 42px 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty .primary { max-width: 220px; margin: 16px auto 0; }
+
+.pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--mint);
+  color: var(--forest);
+  font-size: 13px;
+}
+
+.price { color: var(--ink); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.field { margin-top: 14px; }
+.label { display: block; margin-bottom: 6px; color: var(--ink); font-size: 14px; font-weight: 550; }
+
+input, .select, textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 15px;
+}
+
+input { height: 48px; }
+textarea { min-height: 92px; }
+.select { overflow-wrap: anywhere; }
+.chips { width: 100%; white-space: nowrap; margin: 16px 0; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.chip.active { background: var(--ink); color: #fff; }
+
+.modal-mask {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(19, 24, 20, .45);
+}
+
+.sheet {
+  width: 100%;
+  max-width: 580px;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 16px 18px 22px;
+  padding-bottom: calc(22px + var(--safe-bottom));
+  border-radius: 26px 26px 0 0;
+  background: #fff;
+}
+
+.close { padding: 0; background: var(--soft); color: var(--ink); font-size: 24px; }
+.split { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.note { margin: 10px 0 16px; }
+
+.error {
+  padding: 12px 14px;
+  margin: 12px 0;
+  border-radius: 14px;
+  background: #fbefe9;
+  color: #873f2e;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* 标签页标题共用同一组品牌色和功能图标。 */
+.section-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.section-intro { min-width: 0; }
+.section-intro .muted { margin-top: 5px; font-size: 14px; }
+.section-symbol {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--mint);
+}
+.section-symbol image { width: 26px; height: 26px; }
+
+@media (max-width: 350px) {
+  .page { padding-right: 14px; padding-left: 14px; }
+  .title { font-size: 29px; }
+  .sheet { padding-right: 14px; padding-left: 14px; }
 }

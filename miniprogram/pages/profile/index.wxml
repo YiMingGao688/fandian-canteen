@@ -1,1 +1,56 @@
-<view class="page tab-page"><view class="profile-card"><view class="avatar">饭</view><view class="title">{{account ? account.displayName : '下一餐，好好吃饭。'}}</view><view class="note">{{account ? '学号 ' + account.username : '登录后查看预约与取餐凭证'}}</view><button wx:if="{{!account}}" class="primary" bindtap="login">登录 / 注册</button><text wx:else class="pill">校园学生账号</text></view><view class="card"><view class="menu-link" bindtap="orders"><text>我的预约</text><text>订单、取餐码　›</text></view><view class="menu-link" bindtap="favorites"><text>我的收藏</text><text>再来一餐喜欢的味道　›</text></view><view class="menu-link" bindtap="feedback"><text>意见与反馈</text><text>查看窗口回复　›</text></view></view><view class="note">按需点餐，珍惜每一份食物。当前支付为模拟支付，不扣真实资金。</view><button wx:if="{{account}}" class="outline full" bindtap="logout">退出登录</button><button class="link full" bindtap="settings">服务器设置</button><view wx:if="{{settings}}" class="card"><view class="label">开发联调服务器</view><input value="{{server}}" bindinput="server" placeholder="https://你的域名"/><view class="note">地址只填主机和端口。模拟器可用电脑 localhost；手机需要可达的服务器地址。切换服务器会退出账号。</view><button class="primary full" bindtap="saveServer" loading="{{saving}}" disabled="{{saving}}">保存并检查连接</button></view></view>
+<view class="page tab-page profile-page dock-metrics">
+  <view class="profile-account">
+    <view class="profile-identity">
+      <view class="profile-mark">
+        <image src="/assets/images/fandian-mark.png" mode="aspectFit" aria-hidden="true" />
+      </view>
+      <view class="profile-intro">
+        <text class="profile-name">{{account ? account.displayName : '欢迎来饭点'}}</text>
+        <text class="profile-account-detail">{{account ? '学号 ' + account.username : '用学号登录，预约食堂取餐'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!account}}" class="profile-login-row">
+      <button class="reservation-button profile-login" bindtap="login" hover-class="pressed">登录 / 注册</button>
+    </view>
+  </view>
+
+  <view wx:if="{{connectionIssue && !settings}}" class="profile-connection" role="alert">
+    <view class="profile-connection-copy">
+      <text class="profile-connection-title">服务暂时未连接</text>
+      <text>{{connectionIssue}}</text>
+    </view>
+    <button class="profile-action" bindtap="refresh" hover-class="pressed">重试</button>
+  </view>
+
+  <!-- 原生按钮有平台默认边距，入口行单独指定宽度和左右边距。 -->
+  <view class="profile-menu">
+    <button class="profile-menu-link" bindtap="orders" hover-class="pressed">
+      <view class="profile-menu-icon"><image src="/assets/tab-bar/calendar-selected.svg" mode="aspectFit" aria-hidden="true" /></view>
+      <text class="profile-menu-label">我的预约</text>
+      <view class="chevron profile-menu-arrow" aria-hidden="true" />
+    </button>
+    <button class="profile-menu-link" bindtap="favorites" hover-class="pressed">
+      <view class="profile-menu-icon profile-favorites-icon"><text aria-hidden="true">♡</text></view>
+      <text class="profile-menu-label">我的收藏</text>
+      <view class="chevron profile-menu-arrow" aria-hidden="true" />
+    </button>
+    <button class="profile-menu-link" bindtap="feedback" hover-class="pressed">
+      <view class="profile-menu-icon profile-feedback-icon"><image src="/assets/tab-bar/bell.svg" mode="aspectFit" aria-hidden="true" /></view>
+      <text class="profile-menu-label">意见与反馈</text>
+      <view class="chevron profile-menu-arrow" aria-hidden="true" />
+    </button>
+  </view>
+
+  <view class="profile-footer">
+    <button class="profile-action" disabled="{{saving}}" bindtap="settings" hover-class="pressed">{{settings ? '收起服务器设置' : '服务器设置'}}</button>
+    <button wx:if="{{account}}" class="profile-action profile-logout" bindtap="logout" hover-class="pressed">退出登录</button>
+  </view>
+  <view wx:if="{{settings}}" class="card profile-settings">
+    <text class="label">服务器地址</text>
+    <input value="{{server}}" bindinput="server" disabled="{{saving}}" placeholder="https://你的域名"
+      confirm-type="done" bindconfirm="saveServer" aria-label="服务器地址" />
+    <view wx:if="{{settingsError || connectionIssue}}" class="profile-settings-error" role="alert">{{settingsError || connectionIssue}}</view>
+    <view class="note profile-settings-note">{{simulator ? '模拟器默认连接本机服务。' : '请填写手机可以访问的服务器地址。'}}切换地址后需重新登录。</view>
+    <button class="reservation-button profile-save" bindtap="saveServer" loading="{{saving}}" disabled="{{saving}}">测试连接并保存</button>
+  </view>
+</view>

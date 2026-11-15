@@ -1,8 +1,12 @@
-<view class="orders-top-edge" aria-hidden="true" />
-<view class="page tab-page orders-page">
-  <view class="eyebrow">YOUR NEXT GOOD MEAL</view>
-  <view class="title">我的预约</view>
-  <view class="note orders-intro">预约、取餐码与用餐记录，都在这里。</view>
+<page-meta page-style="{{editing || reviewing || paymentOrder ? 'overflow: hidden;' : ''}}" />
+<view class="page tab-page orders-page dock-metrics">
+  <view class="section-header">
+    <view class="section-intro">
+      <view class="title">我的预约</view>
+      <view class="muted">取餐时间、凭证和用餐记录</view>
+    </view>
+    <view class="section-symbol"><image src="/assets/tab-bar/calendar.svg" mode="aspectFit" aria-hidden="true" /></view>
+  </view>
 
   <view wx:if="{{!logged}}" class="empty">
     登录后查看预约
@@ -14,20 +18,29 @@
         {{item}}
       </view>
     </scroll-view>
-    <view wx:if="{{!visible.length}}" class="empty">暂时没有这类预约</view>
+    <view wx:if="{{loadError}}" class="error" role="alert">
+      <text>预约加载失败。{{loadError}}</text>
+      <button class="link" disabled="{{loadingOrders}}" bindtap="retryOrders">重新加载</button>
+    </view>
+    <view wx:elif="{{loadingOrders && !visible.length}}" class="empty">正在加载预约…</view>
+    <view wx:elif="{{!visible.length}}" class="empty">暂时没有这类预约</view>
 
     <view wx:for="{{visible}}" wx:key="id" class="card order-card">
-      <view class="row between">
+      <view class="row between order-card-heading">
         <text class="food-name">{{item.windowName}}</text>
-        <text class="pill order-status">{{item.statusText}}</text>
+        <text class="pill order-status order-status-{{item.status}}">{{item.statusText}}</text>
       </view>
-      <view class="note order-time">{{item.canteenName}} · {{item.serviceDate}}　{{item.startTime}} – {{item.endTime}}</view>
+      <view class="order-time">
+        <text>{{item.canteenName}} · {{item.serviceDate}}</text>
+        <text>{{item.startTime}} – {{item.endTime}}</text>
+      </view>
+      <view wx:if="{{item.location}}" class="tiny order-location">取餐地点 {{item.location}}</view>
       <view wx:for="{{item.items}}" wx:for-item="line" wx:key="id" class="row split">
         <image class="order-item-image" src="{{line.image}}" mode="aspectFill" />
         <text class="order-item-name">{{line.name}}</text>
         <text>× {{line.number}}</text>
       </view>
-      <view wx:if="{{item.pickupCode && item.status >= 2 && item.status <= 4}}" class="ticket">
+      <view wx:if="{{item.pickupCode && item.status >= 2 && item.status <= 4}}" class="ticket {{item.status === 4 ? 'ticket-ready' : ''}}">
         <view class="tiny">到窗出示取餐码</view>
         <view class="code">{{item.pickupCode}}</view>
         <view class="tiny">{{item.status === 4 ? '已备好，请前往窗口取餐' : '等待备餐完成后前往窗口'}}</view>
@@ -36,7 +49,10 @@
       <view wx:if="{{item.status === 6}}" class="note">{{item.cancelReason || '预约已取消'}}</view>
 
       <view class="split order-summary">
-        <text class="price order-price">¥{{item.amountText}}</text>
+        <view class="order-total">
+          <text class="tiny">预约金额</text>
+          <text class="price order-price">¥{{item.amountText}}</text>
+        </view>
         <view wx:if="{{item.status === 1 || item.status === 2}}" class="order-actions">
           <button class="link danger" disabled="{{busy}}" data-id="{{item.id}}" bindtap="cancelOrder">取消预约</button>
           <button class="outline" disabled="{{busy}}" data-id="{{item.id}}" bindtap="edit">改约</button>
@@ -56,7 +72,7 @@
 </view>
 
 <view wx:if="{{editing || reviewing}}" class="modal-mask orders-mask" bindtap="close">
-  <view class="sheet" catchtap="noop">
+  <view class="sheet orders-sheet dock-metrics" catchtap="noop">
     <view class="row between">
       <text class="order-sheet-title">{{editing ? '换个取餐时间' : '这一餐，还好吗？'}}</text>
       <button class="close" aria-label="关闭" disabled="{{busy}}" bindtap="close">×</button>
@@ -72,12 +88,12 @@
         busy="{{busy}}"
         bind:datechange="dateChange"
         bind:slotchange="slotChange"
-        bind:retry="loadSlots"
+        bind:retry="retrySlots"
       />
       <button class="primary full" disabled="{{busy || loadingSlots || slotIndex < 0}}" bindtap="saveEdit">确认改约</button>
     </block>
     <block wx:else>
-      <view class="row review-stars">
+      <view class="row review-stars" aria-label="用餐评分">
         <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" data-rating="{{item}}" bindtap="rate">{{item <= rating ? '★' : '☆'}}</text>
       </view>
       <textarea class="field" value="{{content}}" bindinput="content" maxlength="300" placeholder="味道、分量、服务，都可以聊聊" />
@@ -87,25 +103,35 @@
 </view>
 
 <view wx:if="{{paymentOrder}}" class="modal-mask orders-mask" bindtap="closePayment">
-  <view class="sheet" catchtap="noop" aria-label="模拟收银台">
-    <view class="row between">
-      <text class="order-sheet-title">模拟收银台</text>
+  <view class="sheet orders-sheet dock-metrics" catchtap="noop" aria-label="模拟收银台">
+    <view class="payment-heading">
+      <view>
+        <text class="order-sheet-title">确认预约支付</text>
+        <text class="payment-subtitle">核对金额和取餐信息后继续</text>
+      </view>
       <button class="close" aria-label="关闭模拟收银台" disabled="{{busy}}" bindtap="closePayment">×</button>
     </view>
     <view class="payment-total">
-      <text class="muted">订单金额</text>
+      <text class="payment-total-label">本次需支付</text>
       <text class="payment-amount">¥{{paymentOrder.amountText}}</text>
-      <text class="tiny">测试支付，不扣款</text>
     </view>
-    <view class="row between payment-window">
-      <text class="muted">取餐窗口</text>
-      <text>{{paymentOrder.windowName}}</text>
+    <view class="payment-details">
+      <view class="row between payment-window">
+        <text class="muted">取餐窗口</text>
+        <text>{{paymentOrder.windowName}}</text>
+      </view>
+      <view class="row between payment-window">
+        <text class="muted">取餐时间</text>
+        <text>{{paymentOrder.serviceDate}} · {{paymentOrder.startTime}}–{{paymentOrder.endTime}}</text>
+      </view>
+      <view wx:if="{{paymentOrder.location}}" class="payment-location">{{paymentOrder.location}}</view>
     </view>
     <view wx:if="{{paymentError}}" class="error" role="alert">{{paymentError}}</view>
     <button class="primary full" disabled="{{busy}}" bindtap="confirmPayment">{{busy ? '处理中…' : (paymentError ? '重试模拟支付' : '确认模拟支付')}}</button>
     <view class="payment-options">
-      <button class="outline" disabled="{{busy}}" bindtap="failPayment">模拟失败</button>
+      <button class="outline" disabled="{{busy}}" bindtap="failPayment">模拟支付失败</button>
       <button class="outline" disabled="{{busy}}" bindtap="closePayment">取消付款</button>
     </view>
+    <text class="payment-footnote">本页面为本地演示，模拟支付不会扣款。</text>
   </view>
 </view>

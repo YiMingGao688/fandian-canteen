@@ -1,1 +1,2 @@
-App({ onLaunch() { /* 会话由 utils/api 统一读取，页面进入时向后端复核。 */ } })
+// 预约创建后通过内存交接给底栏页面，离开小程序进程时无需保留。
+App({ globalData: { createdReservation: null } })

@@ -1,0 +1,8 @@
+/* 独立渲染的自定义导航与页面内容共用底部尺寸。 */
+.dock-metrics {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-height: 54px;
+  --tab-space: calc(var(--tab-height) + var(--safe-bottom));
+  --cart-height: 60px;
+  --dock-gap: 8px;
+}

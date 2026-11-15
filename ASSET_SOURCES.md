@@ -10,6 +10,15 @@
 - `soup.jpg`: [Unsplash photo](https://images.unsplash.com/photo-1569293511145-3ab84dddd911?auto=format&fit=crop&w=1200&q=85&fm=jpg)
 - `noodles.jpg`: [Unsplash photo](https://images.unsplash.com/photo-1657457320973-e8cf9b4d4a59?auto=format&fit=crop&w=1200&q=85&fm=jpg)
 - `orange.jpg`: [Unsplash photo](https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=1200&q=85&fm=jpg)
+- `miniprogram/assets/images/fandian-mark.png` 为已有饭点标志 `web/public/branding/fandian-symbol.png` 的小尺寸版本。
+- `miniprogram/assets/images/canteen-cover.jpg` 由内置 imagegen 生成，用于小程序点餐页封面。
+
+<details>
+<summary>点餐页封面生成提示词</summary>
+
+Use case: photorealistic-natural. Asset type: wide mobile storefront food photograph for a Chinese campus canteen reservation mini program. Make an overhead commercial editorial food photograph. A real, appetizing Chinese campus canteen lunch with a round ivory porcelain plate of soy-glazed chicken pieces, fluffy white rice, vivid fresh bok choy and a few sesame seeds, with a hint of a dark stoneware soup bowl along the upper right edge. A rich nearly black forest-green tabletop with fine matte texture. Plate on the RIGHT, central at about 76 percent of image width, photograph fills the whole canvas. Keep the LEFT 43 percent dark green, clean and low contrast with no objects for a Chinese title that will be drawn in code. Shot from directly overhead, soft directional daylight from upper right, warm and natural actual food colors, casual campus lunch rather than fine dining. Wide landscape aspect ratio near 2:1, plate visually large, designed to crop slightly top and bottom at mobile widths. No text, logo, watermark, typography, UI, decorative graphic or person.
+
+</details>
 
 # 运营大屏视觉参考
 

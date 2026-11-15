@@ -1,116 +1,56 @@
-.glass-tab-shade {
+@import "../styles/bottom-dock.wxss";
+
+/* 导航常驻底部，四个入口在未选中时也保留文字。 */
+.meal-tab-bar {
   position: fixed;
-  z-index: 19;
+  z-index: 20;
   right: 0;
   bottom: 0;
   left: 0;
-  height: calc(82px + env(safe-area-inset-bottom, 0px));
-  height: calc(var(--hexu-tab-top, 68px) + 14px);
-  background: linear-gradient(to bottom, rgba(248, 247, 241, 0), rgba(248, 247, 241, .43));
-  pointer-events: none;
-}
-
-.glass-tab-bar {
-  position: fixed;
-  z-index: 20;
-  right: 14px;
-  bottom: 8px;
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  bottom: var(--hexu-tab-bottom, calc(8px + env(safe-area-inset-bottom, 0px)));
-  left: 14px;
   display: flex;
-  gap: 2px;
   box-sizing: border-box;
-  max-width: 408px;
-  height: var(--hexu-tab-height, 60px);
+  max-width: 580px;
+  height: var(--tab-space, 54px);
   margin: 0 auto;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, .72);
-  border-radius: 999px;
-  background: linear-gradient(150deg, rgba(255, 255, 255, .94), rgba(244, 247, 240, .90));
-  box-shadow: 0 8px 22px rgba(27, 40, 31, .13),
-    0 2px 5px rgba(27, 40, 31, .09),
-    inset 0 1px 2px rgba(255, 255, 255, .92),
-    inset 0 -1px 2px rgba(46, 62, 50, .12);
+  padding: 3px 10px var(--safe-bottom);
+  border-top: 1px solid #e9eae7;
+  background: #fff;
 }
 
-/* 支持背景滤镜时降低底色遮盖，让滚动中的图片和文字透过玻璃。 */
-@supports (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px)) {
-  .glass-tab-bar {
-    background: radial-gradient(ellipse at 0% 0%, rgba(255, 255, 255, .34), transparent 57%),
-      radial-gradient(ellipse at 100% 100%, rgba(255, 255, 255, .23), transparent 53%),
-      linear-gradient(155deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, .20) 53%, rgba(245, 249, 240, .33));
-    -webkit-backdrop-filter: blur(19px) saturate(170%);
-    backdrop-filter: blur(19px) saturate(170%);
-  }
-}
-
-.glass-tab-bar::before {
-  position: absolute;
-  inset: 1px;
-  border: 1px solid transparent;
-  border-top-color: rgba(255, 255, 255, .69);
-  border-bottom-color: rgba(255, 255, 255, .39);
-  border-radius: inherit;
-  pointer-events: none;
-  content: '';
-}
-
-.glass-tab-item {
-  position: relative;
+.meal-tab-item {
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1px;
   box-sizing: border-box;
   width: auto;
-  min-width: 0;
+  min-width: 44px;
+  min-height: 44px;
   margin: 0;
-  padding: 0;
+  padding: 0 3px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
-  color: #2d382f;
-  line-height: 1;
-  transition: background-color 160ms ease, transform 180ms cubic-bezier(.2, .75, .3, 1);
+  color: #586155;
+  line-height: 1.25;
 }
 
-.glass-tab-item::after {
-  border: 0;
-}
+.meal-tab-item::after { border: 0; }
+.meal-tab-current { color: #12663e; }
+.meal-tab-pressed { opacity: .72; }
 
-.glass-tab-item.glass-tab-selected {
-  background: linear-gradient(160deg, rgba(42, 67, 49, .12), rgba(42, 67, 49, .065));
-  box-shadow: inset 0 1px 1px rgba(36, 64, 44, .07), inset 0 -1px 1px rgba(255, 255, 255, .47);
-  color: #28543c;
+.meal-tab-symbol {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 26px;
+  border-radius: 9px;
 }
-
-.glass-tab-item.glass-tab-pressed {
-  background-color: rgba(42, 67, 49, .10);
-  transform: scale(.94);
-}
-
-.glass-tab-icon {
-  display: block;
-  width: 24px;
-  height: 24px;
-  margin-bottom: 2px;
-}
-
-.glass-tab-label {
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 12px;
-  white-space: nowrap;
-}
-
-.glass-tab-selected .glass-tab-label {
-  font-weight: 650;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .glass-tab-item {
-    transition: none;
-  }
-}
+.meal-tab-current .meal-tab-symbol { background: #e9f4e5; }
+.meal-tab-icon { display: block; width: 20px; height: 20px; }
+.meal-tab-label { font-size: 11px; white-space: nowrap; }
+.meal-tab-current .meal-tab-label { font-weight: 700; }

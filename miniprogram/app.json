@@ -1,11 +1,11 @@
 {
   "pages": ["pages/home/index", "pages/orders/index", "pages/notices/index", "pages/profile/index", "pages/login/index", "pages/checkout/index"],
-  "window": {"navigationBarTitleText": "饭点", "navigationBarBackgroundColor": "#f8f7f1", "navigationBarTextStyle": "black", "backgroundColor": "#f8f7f1", "backgroundTextStyle": "dark", "enablePullDownRefresh": true},
+  "window": {"navigationBarTitleText": "饭点", "navigationBarBackgroundColor": "#f3f5f2", "navigationBarTextStyle": "black", "backgroundColor": "#f3f5f2", "backgroundTextStyle": "dark", "enablePullDownRefresh": true},
   "tabBar": {
     "custom": true,
-    "color": "#808a7c",
-    "selectedColor": "#294e39",
-    "backgroundColor": "#fffef9",
+    "color": "#586155",
+    "selectedColor": "#12663e",
+    "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
       {"pagePath": "pages/home/index", "text": "点餐"},

@@ -1,25 +1,43 @@
-<view class="page checkout-page">
-  <view class="checkout-header">
-    <view class="row between">
-      <view class="checkout-title">安排取餐</view>
-      <text wx:if="{{cart.length}}" class="pill checkout-badge">到窗自取</text>
-    </view>
-    <view wx:if="{{cart.length && window}}" class="checkout-window">
-      <text class="checkout-window-name">{{window.name}}</text>
-      <text class="checkout-location">{{window.location || window.canteenName}}</text>
-    </view>
+<view class="page checkout-page dock-metrics">
+  <view wx:if="{{confirmed}}" class="card checkout-state">
+    <text>{{confirmPay ? '预约已创建，请在下单后 15 分钟内完成支付。' : '已确认预约结果，可在预约页查看最新状态。'}}</text>
+    <button class="reservation-button checkout-retry" bindtap="openOrders">查看预约</button>
+  </view>
+  <view wx:elif="{{loadingCart && !cart.length}}" class="card checkout-state">正在核对餐盘…</view>
+  <view wx:elif="{{loadError}}" class="card checkout-state" role="alert">
+    <text>{{loadError}}</text>
+    <button class="outline checkout-retry" disabled="{{loadingCart || busy}}" bindtap="load">重新加载</button>
+  </view>
+  <view wx:elif="{{!cart.length}}" class="card checkout-state">
+    <text>餐盘还没有菜品</text>
+    <button class="reservation-button checkout-retry" bindtap="backToMenu">返回点餐</button>
   </view>
 
-  <view wx:if="{{!cart.length}}" class="empty">餐盘是空的，请返回点餐页选菜。</view>
   <block wx:else>
+    <!-- 先展示取餐窗口和时段，金额和备注放在餐盘明细之后。 -->
+    <view wx:if="{{pendingSlot}}" class="checkout-alert" role="alert">
+      <text class="checkout-alert-text">尚未收到预约结果。重试会沿用原时段 {{pendingSlot}}。</text>
+    </view>
+    <view wx:elif="{{submitError && !cartError}}" class="checkout-alert" role="alert">
+      <text class="checkout-alert-text">{{submitError}}</text>
+    </view>
     <view wx:if="{{cartError}}" class="checkout-alert" role="alert">
       <text class="checkout-alert-text">{{cartError}}</text>
       <view class="checkout-alert-actions">
-        <button wx:if="{{hasInvalid}}" class="checkout-alert-button" disabled="{{busy}}" bindtap="removeInvalid">移除失效菜品</button>
-        <button class="checkout-alert-button secondary" disabled="{{busy}}" bindtap="clearCart">清空餐盘</button>
+        <button wx:if="{{hasInvalid}}" class="checkout-alert-button" disabled="{{busy || loadingCart}}" bindtap="removeInvalid">移除失效菜品</button>
+        <button class="checkout-alert-button secondary" disabled="{{busy || loadingCart}}" bindtap="backToMenu">返回点餐调整</button>
+        <button class="checkout-alert-button secondary" disabled="{{busy || loadingCart}}" bindtap="clearCart">清空餐盘</button>
       </view>
     </view>
-    <view class="card checkout-card checkout-times">
+    <view wx:else class="checkout-card pickup-card">
+      <view class="checkout-window">
+        <view class="checkout-window-symbol"><image src="/assets/tab-bar/calendar-selected.svg" mode="aspectFit" aria-hidden="true" /></view>
+        <view class="checkout-window-copy">
+          <text class="checkout-window-name">{{window.name}}</text>
+          <text class="checkout-location">{{window.location || window.canteenName}}</text>
+        </view>
+        <text class="checkout-mode">预约自取</text>
+      </view>
       <pickup-time
         dates="{{dates}}"
         date-index="{{dateIndex}}"
@@ -27,45 +45,58 @@
         slot-index="{{slotIndex}}"
         loading="{{loadingSlots}}"
         failed="{{slotLoadFailed}}"
-        busy="{{busy}}"
+        busy="{{busy || !!pendingSlot}}"
         bind:datechange="dateChange"
         bind:slotchange="slotChange"
         bind:retry="loadSlots"
       />
     </view>
 
-    <view class="card checkout-card">
-      <view class="checkout-section-title">餐盘明细</view>
+    <view class="checkout-card">
+      <view class="row between checkout-section-heading">
+        <text class="checkout-section-title">菜品明细</text>
+        <text class="checkout-caption">共 {{count}} 份</text>
+      </view>
       <view wx:for="{{cart}}" wx:key="id" class="checkout-item">
-        <image class="checkout-item-image" src="{{item.image}}" mode="aspectFill" />
-        <text class="checkout-item-name">{{item.name}}</text>
+        <image wx:if="{{item.image}}" class="checkout-item-image" src="{{item.image}}" mode="aspectFill"
+          data-id="{{item.id}}" binderror="imageError" aria-hidden="true" />
+        <view wx:else class="checkout-item-image checkout-item-placeholder">
+          <image src="/assets/tab-bar/meal.svg" mode="aspectFit" aria-hidden="true" />
+        </view>
+        <view class="checkout-item-copy">
+          <text class="checkout-item-name">{{item.name}}</text>
+          <text class="checkout-item-count">× {{item.number}}</text>
+          <text wx:if="{{item.shortage}}" class="checkout-item-stock">库存不足 · 余 {{item.stock}} 份</text>
+        </view>
         <text wx:if="{{item.invalid}}" class="checkout-item-invalid">已下架</text>
-        <text class="checkout-item-count">× {{item.number}}</text>
+        <text wx:else class="checkout-item-amount"><text class="currency">¥</text>{{item.subtotalText}}</text>
       </view>
     </view>
 
-    <view class="card checkout-card">
+    <view wx:if="{{!cartError}}" class="checkout-card checkout-options">
       <view class="row between">
-        <text class="checkout-section-title">备注</text>
+        <text class="checkout-section-title">取餐备注</text>
         <text class="checkout-caption">选填</text>
       </view>
-      <textarea class="checkout-remark" value="{{remark}}" bindinput="remark" maxlength="100" placeholder="例如：少辣，不要香菜" />
+      <textarea class="checkout-remark" value="{{remark}}" disabled="{{busy || !!pendingSlot}}" bindinput="remark" maxlength="100"
+        placeholder="例如：少辣，不要香菜" aria-label="取餐备注" />
       <view class="row between checkout-cutlery">
         <text>需要餐具</text>
-        <switch checked="{{cutlery}}" color="#294f39" bindchange="cutlery" />
+        <switch checked="{{cutlery}}" disabled="{{busy || !!pendingSlot}}" color="#12663e" bindchange="cutlery" aria-label="需要餐具" />
       </view>
     </view>
+    <text wx:if="{{!cartError}}" class="checkout-payment-note">预约提交后，请在 15 分钟内完成支付。</text>
 
     <view class="checkout-footer">
-      <view class="checkout-total">
+      <view wx:if="{{!cartError}}" class="checkout-total">
         <text class="checkout-caption">合计</text>
-        <text class="checkout-price">¥{{total}}</text>
+        <text class="checkout-price"><text class="currency">¥</text>{{total}}</text>
       </view>
-      <button
-        class="checkout-submit"
-        disabled="{{busy || loadingSlots || cartError || slotIndex < 0}}"
-        bindtap="submit"
-      >{{busy ? '正在提交…' : cartError ? '请先处理餐盘' : loadingSlots ? '正在读取时段…' : slotLoadFailed ? '请重试加载时段' : slotIndex < 0 ? '暂无可选时段' : '确认预约'}}</button>
+      <button class="reservation-button checkout-submit"
+        disabled="{{busy || (!pendingSlot && (loadingCart || loadingSlots || cartError || slotIndex < 0))}}" bindtap="submit" hover-class="pressed">
+        {{busy ? '正在处理…' : pendingSlot ? '重试原预约' : cartError ? '请先处理餐盘' : loadingCart || loadingSlots ? '正在读取时段…' : slotLoadFailed ? '请重试加载时段' : slotIndex < 0 ? (slots.length ? '请选择取餐时段' : '暂无可选时段') : '提交预约'}}
+        <view wx:if="{{!busy && !loadingCart && !loadingSlots && !cartError && slotIndex >= 0}}" class="chevron" aria-hidden="true" />
+      </button>
     </view>
   </block>
 </view>

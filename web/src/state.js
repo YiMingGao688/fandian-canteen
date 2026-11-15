@@ -10,7 +10,7 @@ try {
     sessionStorage.removeItem(SESSION_STORAGE_KEY)
   }
 } catch { /* 无效会话按未登录处理。 */ }
-export const state = reactive({ token: saved.token || '', account: saved.account || null, windows: [], loginOpen: false, loginRole: 'STAFF', toast: '', toastError: false })
+export const state = reactive({ token: saved.token || '', account: saved.account || null, windows: [], loginOpen: false, loginRole: 'STAFF', toast: '', toastError: false, orderRevision: 0, orderSocketConnected: false })
 let toastTimer
 
 /** 统一同源 API 调用，保留项目 Result 的 code=1 成功规则。 */
