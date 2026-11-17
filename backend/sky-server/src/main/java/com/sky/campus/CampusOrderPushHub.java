@@ -1,7 +1,7 @@
 package com.sky.campus;
 
-import javax.websocket.CloseReason;
-import javax.websocket.Session;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.Session;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
