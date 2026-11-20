@@ -71,15 +71,13 @@ Page({
   async readOrders(token, revision) {
     try {
       const orders = (await u.api('/student/orders')).map(u.order)
-      // 旧轮询可能晚到，不能覆盖下单或支付接口已确认的新状态。
+      // 旧轮询可能晚到，不能覆盖订单操作已确认的新状态。
       if (token !== this.syncSession() || revision !== this.ordersRevision) return
       const { paymentOrder, busy } = this.data
       if (paymentOrder && !busy && !orders.some(order => String(order.id) === String(paymentOrder.id) && order.status === 1)) {
         this.setSheets({ paymentOrder: null, paymentError: '' })
       }
-      const focused = orders.find(order => String(order.id) === String(this.focusOrderId))
-      const filter = focused && this.data.filter === 1 && focused.status !== 1 ? 0 : this.data.filter
-      this.setData({ orders, filter, loadError: '' })
+      this.setData({ orders, loadError: '' })
       this.apply()
     } catch (error) {
       const currentToken = this.syncSession()
@@ -90,13 +88,15 @@ Page({
     }
   },
   retryOrders() { return this.load() },
-  /** 新建预约置顶，学生主动切换筛选后恢复常规排序。 */
+  /** 新建预约置顶，离开待支付后切回全部；学生主动筛选后取消置顶。 */
   apply() {
     const { orders, filter } = this.data
-    const visible = orders.filter(order => !filter || order.status === filter)
-    const index = visible.findIndex(order => String(order.id) === String(this.focusOrderId))
+    const focused = orders.find(order => String(order.id) === String(this.focusOrderId))
+    const activeFilter = focused && filter === 1 && focused.status !== 1 ? 0 : filter
+    const visible = orders.filter(order => !activeFilter || order.status === activeFilter)
+    const index = visible.indexOf(focused)
     if (index > 0) visible.unshift(...visible.splice(index, 1))
-    this.setData({ visible })
+    this.setData({ visible, filter: activeFilter })
   },
   filter(e) {
     this.focusOrderId = null
@@ -112,6 +112,15 @@ Page({
   setSheets(data) {
     this.setData(data)
     this.syncTabBar()
+  },
+  /** 更新服务端已确认的订单字段，避免操作前发出的轮询覆盖新状态或被后续刷新复用。 */
+  updateOrder(id, changes, sheets = {}) {
+    this.ordersRevision = (this.ordersRevision || 0) + 1
+    this.orderRequest = null
+    const orders = this.data.orders.map(order => String(order.id) === String(id) ? { ...order, ...changes } : order)
+    this.setSheets({ orders, loadingOrders: false, ...sheets })
+    this.apply()
+    wx.stopPullDownRefresh()
   },
   /** 只允许从当前待支付预约进入演示收银台，实际支付状态由后端确认。 */
   openPayment(e) {
@@ -140,11 +149,8 @@ Page({
     try {
       const paid = u.order(await u.api('/student/orders/' + paymentOrder.id + '/pay', 'POST'))
       if (token !== this.syncSession()) return
-      this.ordersRevision = (this.ordersRevision || 0) + 1
-      const orders = this.data.orders.map(order => String(order.id) === String(paid.id) ? paid : order)
       const filter = this.data.filter === 1 ? 0 : this.data.filter
-      this.setSheets({ orders, filter, paymentOrder: null })
-      this.apply()
+      this.updateOrder(paid.id, paid, { filter, paymentOrder: null })
       u.toast('模拟支付完成，请等待窗口备餐')
     } catch (error) {
       if (token === this.syncSession() && !error.sessionChanged) this.setData({ paymentError: error.message })
@@ -167,10 +173,11 @@ Page({
     if (!confirmation.confirm || this.data.busy || token !== this.syncSession()) return
     this.setData({ busy: true })
     await u.run(this, async () => {
-      await u.api('/student/orders/' + id + '/cancel', 'POST')
+      const cancelled = await u.api('/student/orders/' + id + '/cancel', 'POST')
       if (token !== this.syncSession()) return
+      this.updateOrder(id, u.order(cancelled))
       u.toast('预约已取消')
-      await this.load()
+      await this.load(true)
     })
     if (token === this.syncSession()) this.setData({ busy: false })
   },
@@ -206,17 +213,18 @@ Page({
   retrySlots() { return this.loadSlots() },
   dateChange(e) { this.setData({ dateIndex: Number(e.detail.value) }); return this.loadSlots() },
   slotChange(e) { this.setData({ slotIndex: Number(e.detail.value) }) },
+  /** 改约成功后立即展示服务端返回的时段，再同步本人预约列表。 */
   async saveEdit() {
     const token = this.syncSession()
     const { busy, editing, loadingSlots, slots, slotIndex } = this.data
     if (busy || loadingSlots || !editing || !slots[slotIndex] || !u.ensureStudent()) return
     this.setData({ busy: true })
     try {
-      await u.api(`/student/orders/${editing.id}/reschedule`, 'POST', { slotId: slots[slotIndex].id })
+      const updated = await u.api(`/student/orders/${editing.id}/reschedule`, 'POST', { slotId: slots[slotIndex].id })
       if (token !== this.syncSession()) return
-      this.setSheets({ editing: null })
+      this.updateOrder(editing.id, u.order(updated), { editing: null })
       u.toast('改约成功')
-      await this.load()
+      await this.load(true)
     } catch (error) {
       if (token === this.syncSession() && !error.sessionChanged) {
         u.toast(error.message)
@@ -236,15 +244,16 @@ Page({
   content(e) { this.setData({ content: e.detail.value }) },
   async saveReview() {
     const token = this.syncSession()
-    if (this.data.busy || !this.data.reviewing || !u.ensureStudent()) return
-    if (!this.data.content.trim()) return u.toast('请写下用餐感受')
+    const { busy, reviewing, rating, content } = this.data
+    if (busy || !reviewing || !u.ensureStudent()) return
+    if (!content.trim()) return u.toast('请写下用餐感受')
     this.setData({ busy: true })
     await u.run(this, async () => {
-      await u.api('/student/reviews', 'POST', { orderId: this.data.reviewing, rating: this.data.rating, content: this.data.content })
+      await u.api('/student/reviews', 'POST', { orderId: reviewing, rating, content })
       if (token !== this.syncSession()) return
-      this.setSheets({ reviewing: null })
+      this.updateOrder(reviewing, { reviewed: true }, { reviewing: null })
       u.toast('谢谢你的评价')
-      await this.load()
+      await this.load(true)
     })
     if (token === this.syncSession()) this.setData({ busy: false })
   },

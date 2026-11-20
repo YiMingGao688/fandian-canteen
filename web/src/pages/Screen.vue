@@ -45,17 +45,24 @@ const windowStates = computed(() => [
   { key: 'completed', label: '已核销', value: focusedWindow.value?.completed || 0 },
 ])
 
-/** 只读取全校聚合接口，刷新失败时保留最后一次成功数据。 */
+let overviewRequestNumber = 0
+/** 只应用最新的聚合请求结果；刷新失败时保留当前日期最近一次成功的数据。 */
 async function load() {
-  if (!allowed.value) return
+  const number = ++overviewRequestNumber
+  if (!allowed.value) {
+    loading.value = false
+    return
+  }
   loading.value = true
   try {
-    data.value = await api(`/screen/overview?date=${date.value}`)
+    const overview = await api(`/screen/overview?date=${date.value}`)
+    if (number !== overviewRequestNumber) return
+    data.value = overview
     error.value = ''
   } catch (exception) {
-    error.value = exception.message
+    if (number === overviewRequestNumber) error.value = exception.message
   } finally {
-    loading.value = false
+    if (number === overviewRequestNumber) loading.value = false
   }
 }
 
@@ -72,18 +79,24 @@ async function toggleFull() {
 }
 
 watch(windows, rows => {
-  if (!rows.some(window => window.id === selectedWindowId.value)) selectedWindowId.value = rows[0]?.id ?? null
+  if (data.value && !rows.some(window => window.id === selectedWindowId.value)) selectedWindowId.value = rows[0]?.id ?? null
 })
-watch([() => state.account?.userId, date], load)
+// 日期或会话切换时清空旧数据，避免新日期的标签与旧快照同时出现。
+watch([allowed, () => state.token, date], () => {
+  data.value = null
+  error.value = ''
+  load()
+})
 let refreshTimer
 let clockTimer
 onMounted(() => {
   load()
-  refreshTimer = setInterval(load, 15000)
+  refreshTimer = setInterval(() => { if (!loading.value && allowed.value) load() }, 15000)
   clockTimer = setInterval(() => { clock.value = new Date() }, 1000)
   document.addEventListener('fullscreenchange', syncFullscreen)
 })
 onUnmounted(() => {
+  overviewRequestNumber++
   clearInterval(refreshTimer)
   clearInterval(clockTimer)
   document.removeEventListener('fullscreenchange', syncFullscreen)
@@ -136,7 +149,7 @@ onUnmounted(() => {
     </section>
 
     <template v-else>
-      <p v-if="error" class="screen-error">{{ error }} · 正在展示最近一次同步结果</p>
+      <p v-if="error" class="screen-error">{{ error }}{{ data ? ' · 正在展示最近一次同步结果' : '' }}</p>
       <section class="screen-metrics" aria-label="全校关键指标">
         <MechanicalPanel v-for="metric in metrics" :key="metric.label" as="article" class="screen-metric-frame" level="kpi" :accent="metric.featured ? 'gold' : 'teal'" :class="{ 'metric-featured': metric.featured }">
           <div class="metric-label"><i v-if="metric.featured" />{{ metric.label }}</div>

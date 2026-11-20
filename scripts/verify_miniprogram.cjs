@@ -99,8 +99,14 @@ global.wx = {
       records[0].status = 2
       records[0].pickupCode = 'ABCD2345'
       data = records[0]
+    } else if (route === '/student/orders/1/reschedule') {
+      const { startTime, endTime } = slots.find(slot => slot.id === o.data.slotId)
+      Object.assign(records[0], { startTime, endTime })
+      data = records[0]
+    } else if (route === '/student/orders/2/cancel') {
+      records[0].status = 6
+      data = records[0]
     }
-    else if (route === '/student/orders/1/reschedule') data = records[0]
     else if (route === '/student/reviews') { records[0].reviewed = true; data = null }
     else if (route === '/student/feedback') data = [{ id: o.header.Authorization === 'Bearer second' ? 2 : 1 }]
     else if (route === '/me') {
@@ -130,6 +136,22 @@ function page(name) {
   const file = path.join(root, 'pages', name, 'index.js')
   vm.runInNewContext(fs.readFileSync(file, 'utf8'), { require: createRequire(file), Page: d => { definition = d }, getApp, wx, setInterval, clearInterval })
   return { ...definition, data: JSON.parse(JSON.stringify(definition.data)), setData(values) { Object.assign(this.data, values) } }
+}
+
+// 确认修改后的列表会立即更新，旧轮询释放后也保持新状态。
+async function checkOrderChangeDuringPoll(orders, change, assertUpdated) {
+  holdOrdersRead = true
+  const oldRead = orders.load(true)
+  const respondOldRead = finishOrdersRead
+  const mutation = change()
+  try {
+    await new Promise(resolve => setImmediate(resolve))
+    assertUpdated()
+  } finally {
+    respondOldRead()
+    await Promise.all([oldRead, mutation])
+  }
+  assertUpdated()
 }
 async function main() {
   const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json')))
@@ -330,7 +352,10 @@ async function main() {
   assert.equal(bar.data.hidden, false)
   await orders.edit(payTap)
   orders.slotChange({ detail: { value: 0 } })
-  await orders.saveEdit()
+  await checkOrderChangeDuringPoll(orders, () => {
+    failOrdersRead = true
+    return orders.saveEdit()
+  }, () => assert.equal(orders.data.visible[0].startTime, '11:00'))
   assert.equal(calls.find(call => call.route === '/student/orders/1/reschedule').data.slotId, 1)
   assert.equal(orders.data.editing, null)
   assert.equal(bar.data.hidden, false)
@@ -338,9 +363,17 @@ async function main() {
   orders.review(payTap)
   assert.equal(bar.data.hidden, true)
   orders.setData({ content: '测试评价' })
-  await orders.saveReview()
+  await checkOrderChangeDuringPoll(orders, () => orders.saveReview(), () => {
+    assert.equal(orders.data.visible[0].reviewed, true)
+  })
   assert.equal(orders.data.reviewing, null)
   assert.equal(bar.data.hidden, false)
+  records.unshift({ ...records[0], id: 2, status: 2, reviewed: false })
+  await orders.load()
+  const cancelTap = { currentTarget: { dataset: { id: 2 } } }
+  await checkOrderChangeDuringPoll(orders, () => orders.cancelOrder(cancelTap), () => {
+    assert.equal(orders.data.visible.find(order => order.id === 2)?.status, 6)
+  })
   home.openCart()
   await home.clear()
   assert.equal(home.data.cartOpen, true)

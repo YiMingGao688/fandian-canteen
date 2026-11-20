@@ -1,4 +1,4 @@
-// 只在临时 Vite 服务中验证 Web 入口与账号切换，接口响应由浏览器测试提供。
+// 在临时 Vite 服务中验证 Web 入口、账号切换和大屏日期，HTTP 与 WebSocket 响应均由测试提供。
 import { chromium, expect } from '../web/node_modules/@playwright/test/index.mjs'
 import { createServer } from '../web/node_modules/vite/dist/node/index.js'
 import { fileURLToPath } from 'node:url'
@@ -27,9 +27,13 @@ async function fixturePage(viewport) {
   const page = await browser.newPage({ viewport })
   page.context().on('page', tab => tab.on('pageerror', error => errors.push(error.message)))
   page.on('pageerror', error => errors.push(error.message))
+  await page.context().routeWebSocket(/\/campus\/ws\?ticket=fixture-ticket$/, () => {})
   await page.context().route('**/campus/**', async route => {
     const request = route.request()
     const path = new URL(request.url()).pathname.slice('/campus'.length)
+    if (path === '/staff/ws-ticket' && request.method() === 'POST') {
+      return route.fulfill({ json: { code: 1, data: 'fixture-ticket' } })
+    }
     if (path === '/auth/login' && request.method() === 'POST') {
       const account = accounts[request.postDataJSON().username]
       if (account) return route.fulfill({ json: { code: 1, data: { account, token: 'fixture-' + account.username } } })
@@ -110,6 +114,50 @@ try {
     await expect(screen.locator('.screen-metrics')).toBeVisible()
     await screen.goto(base + '/#/admin')
     await expect(screen).toHaveURL(loginUrl)
+  })
+
+  await check('大屏快速切换日期后，迟到的旧响应不会覆盖当前数据', async () => {
+    const dateScreen = await fixturePage({ width: 1440, height: 1000 })
+    await dateScreen.addInitScript(account => {
+      sessionStorage.setItem('hexu.session', JSON.stringify({ account, token: 'fixture-' + account.username }))
+    }, accounts.canteen_screen)
+    const overviewPath = '/campus/screen/overview'
+    const title = dateScreen.locator('.screen-window-title h3')
+    let respondToday, oldRequest, tomorrowDate, tomorrowReads = 0
+    const delayedToday = new Promise(resolve => { respondToday = resolve })
+    await dateScreen.route(url => url.pathname === overviewPath, async route => {
+      const requestedDate = new URL(route.request().url()).searchParams.get('date')
+      tomorrowDate ??= requestedDate
+      const isToday = requestedDate !== tomorrowDate
+      if (isToday) {
+        oldRequest = route.request()
+        await delayedToday
+      }
+      const name = isToday ? '今日窗口' : `明日窗口 ${++tomorrowReads}`
+      const data = { ...fixtures['/screen/overview'], windows: [{ ...windows[0], name }] }
+      await route.fulfill({ json: { code: 1, data } })
+    })
+    try {
+      await dateScreen.goto(base + '/#/screen')
+      await expect(title).toContainText('明日窗口')
+      const todayButton = dateScreen.getByRole('button', { name: '今日', exact: true })
+      await todayButton.click()
+      await expect(todayButton).toHaveClass('active')
+      await expect.poll(() => Boolean(oldRequest)).toBe(true)
+      const tomorrowButton = dateScreen.getByRole('button', { name: '明日', exact: true })
+      const latestName = `明日窗口 ${tomorrowReads + 1}`
+      await tomorrowButton.click()
+      await expect(title).toContainText(latestName)
+      const oldResponse = dateScreen.waitForResponse(response => response.url() === oldRequest.url(), { timeout: 5000 })
+      respondToday()
+      await (await oldResponse).finished()
+      await dateScreen.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await expect(tomorrowButton).toHaveClass('active')
+      await expect(title).toContainText(latestName)
+    } finally {
+      respondToday()
+      await dateScreen.context().close()
+    }
   })
 
   await check('管理会话过期后回到管理登录', async () => {
