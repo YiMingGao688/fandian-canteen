@@ -86,8 +86,3 @@ python -X utf8 .\scripts\build_backend.py
 
 已有本地验证记录包括后端接口检查、小程序模拟流程、管理后台和大屏浏览器检查，以及前后端构建。测试范围见[测试记录](docs/测试记录.md)。
 
-## 技术来源说明
-
-后端基础代码来源于 [`shuhongfan/sky-take-out`](https://github.com/shuhongfan/sky-take-out) 的提交 [`267313f`](https://github.com/shuhongfan/sky-take-out/tree/267313f948bba2001fbc497995a39ef61f2c621f)。本项目在其基础上实现校园预约业务、学生微信小程序、管理端和运营大屏。此次核对的上游提交根目录未发现 `LICENSE` 文件；来源说明不等于许可证授权，公开发布或再分发前应核对上游代码的使用条件。
-
-运营大屏参考阿里云 DataV 公开设计资料中的布局与视觉方法，实际页面由本项目 Vue、ECharts 和 Three.js 源码实现，不依赖 DataV 云端服务，也未将整张模板图作为页面背景。更多素材来源见 [ASSET_SOURCES.md](ASSET_SOURCES.md)。
